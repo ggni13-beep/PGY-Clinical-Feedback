@@ -287,9 +287,11 @@
         // ==========================================
         // RT 專用版 V2.5.1 Firebase-ready
         // 獨立 Assessment Event 與 Feedback Record 雙層架構
-        // 預留 Firebase Authentication / Firestore Security Rules
+        // 含 Schema Version Migration 機制 (v2.5.1，共 300 筆高品質範本)
         // 尚未連接 Firebase
         // ==========================================
+
+        const TEMPLATE_SCHEMA_VERSION = "2.5.1";
 
         // --- 集中管理目前登入使用者的身分物件 (Firebase-ready) ---
         const currentUser = {
@@ -326,7 +328,7 @@
             "SIRIPPP": ["S-情境評估", "I-背景交班", "R-評估建議", "I-執行確認", "P-防範對策", "P-預判反應", "P-成效追蹤"]
         };
 
-        // 常用臨床情境列表
+        // 常用臨床情境列表 (12 個選項)
         const clinicalSituationsList = [
             "呼吸評估",
             "呼吸器設定",
@@ -342,57 +344,97 @@
             "其他"
         ];
 
-        // 產生 EPA 完整 templates (9 EPA × 3 情境 × 3 類型 = 81 templates)
+        // 針對不同情境與回饋面向提供精確、符合呼吸治療師 PGY 教學語境的優化回饋內容
+        function getDetailedTemplateText(epa, sit, feedbackType) {
+            const texts = {
+                "做得好": {
+                    "呼吸評估": `在 ${epa} 之「呼吸評估」中，學員能完整且有條理地收集呼吸道與呼吸運動表徵，呼吸音聽診與觸覺震顫判讀精準。`,
+                    "呼吸器設定": `在 ${epa} 之「呼吸器設定」中，學員能根據病人之肺部力學與血氧狀態，安全且正確地設定初始參數與保護性通氣策略。`,
+                    "Alarm Troubleshooting": `在 ${epa} 之「Alarm Troubleshooting」中，學員展現優秀的危機處理能力，迅速定位氣道阻塞或管路漏氣等警報根因並排除。`,
+                    "Weaning": `在 ${epa} 之「Weaning」中，學員能詳實評估自主呼吸試驗（SBT）指標，對呼吸肌耐力與脫離時機的掌握度極佳。`,
+                    "NIV": `在 ${epa} 之「NIV」中，學員能正確調整面罩密合度與正壓通氣參數，並有效指導病人配合呼吸節奏，降低焦慮。`,
+                    "ABG 判讀": `在 ${epa} 之「ABG 判讀」中，學員能迅速且正確地分析氣體交換與酸鹼平衡狀態，並提出合乎病理生理學的處置建議。`,
+                    "Airway / 人工氣道": `在 ${epa} 之「Airway / 人工氣道」中學員操作無菌抽痰與管路固定技術純熟，氣道深度與氣囊壓力監測落實。`,
+                    "Emergency": `在 ${epa} 之「Emergency」情境中，學員臨危不亂，在呼吸道緊急狀況下能主動配合團隊執行正壓給氧與急救流程。`,
+                    "Communication": `在 ${epa} 之「Communication」中，學員向醫療團隊交班時口條清晰、重點突出，能有效傳遞病人呼吸照護關鍵訊息。`,
+                    "Teamwork": `在 ${epa} 之「Teamwork」中，學員主動與護理及醫師團隊協同合作，展現良好的呼吸治療專業價值與溝通協調力。`,
+                    "病人衛教": `在 ${epa} 之「病人衛教」中，學員能以通俗易懂的語言向病人家屬說明呼吸器使用目的與咳嗽排痰技巧，態度親切具同理心。`
+                },
+                "待加強": {
+                    "呼吸評估": `在 ${epa} 之「呼吸評估」中，對於呼吸困難病人的視診與聽診細節可再深入，部分微小呼吸音的辨識需加強。`,
+                    "呼吸器設定": `在 ${epa} 之「呼吸器設定」中，對於特定病理狀態（如嚴重阻絕性肺病）的參數微調邏輯，建議再多思考安全性與順應性。`,
+                    "Alarm Troubleshooting": `在 ${epa} 之「Alarm Troubleshooting」中，面對複合型警報時排查步驟稍顯慌亂，建議建立系統化的逐步排除SOP。`,
+                    "Weaning": `在 ${epa} 之「Weaning」中，對於脫離指標（如RSBI）的動態變化追蹤不夠全面，評估病人耐受度時可再敏銳一些。`,
+                    "NIV": `在 ${epa} 之「NIV」中，對於面罩壓迫點的皮膚保護與病人面部漏氣的即時處置反應速度需再提昇。`,
+                    "ABG 判讀": `在 ${epa} 之「ABG 判讀」中，對於代償機轉的判讀邏輯偶有混淆，建議加強複合型酸鹼失衡的推導訓練。`,
+                    "Airway / 人工氣道": `在 ${epa} 之「Airway / 人工氣道」中，無菌操作的流暢度與手部衛生細節需再落實，避免潛在感染風險。`,
+                    "Emergency": `在 ${epa} 之「Emergency」中，於高度壓力環境下之任務分工與器材準備速度需要更俐落的主動性。`,
+                    "Communication": `在 ${epa} 之「Communication」中，交班結構化表達（如 SBAR）的精煉度可再加強，避免遺漏關鍵呼吸參數。`,
+                    "Teamwork": `在 ${epa} 之「Teamwork」中，跨團隊溝通時的主動回報與同步訊息傳遞可以更具前瞻性。`,
+                    "病人衛教": `在 ${epa} 之「病人衛教」中，向家屬說明衛教內容時專有名詞較多，建議多轉換為病人易懂的日常語言。`
+                },
+                "下一步": {
+                    "呼吸評估": `建議後續在 ${epa} 之「呼吸評估」中，多接觸多變化的胸腔疾病個案，強化動態呼吸型態變化的鑑別能力。`,
+                    "呼吸器設定": `建議後續在 ${epa} 之「呼吸器設定」中，深入研讀進階呼吸模式（如 APRV 或 PAV）的生理機轉與臨床適應症。`,
+                    "Alarm Troubleshooting": `建議後續在 ${epa} 之「Alarm Troubleshooting」中，累積更多呼吸器機械故障與管路異常之實際排修經驗。`,
+                    "Weaning": `建議後續在 ${epa} 之「Weaning」中，積極參與長期呼吸器依賴病人的脫離計畫擬定與多專科照護討論。`,
+                    "NIV": `建議後續在 ${epa} 之「NIV」中，針對不同呼吸器品牌之非侵襲性設定介面與漏氣補償機制進行比較學習。`,
+                    "ABG 判讀": `建議後續在 ${epa} 之「ABG 判讀」中，結合血行動力學監測數據，進行更全面的氧合與通氣效能綜合評估。`,
+                    "Airway / 人工氣道": `建議後續在 ${epa} 之「Airway / 人工氣道」中，進一步觀摩並學習困難氣道處理設備（如氣管鏡）的準備與配合。`,
+                    "Emergency": `建議後續在 ${epa} 之「Emergency」中，參與高級呼吸道救命術（ACLS / RRT）模擬訓練，增進高壓情境的心理韌性。`,
+                    "Communication": `建議後續在 ${epa} 之「Communication」中，主動練習跨團隊交班與病情變化之危急通報演練。`,
+                    "Teamwork": `建議後續在 ${epa} 之「Teamwork」中，學習在呼吸照護團隊中擔任協調與主動回報的核心角色。`,
+                    "病人衛教": `建議後續在 ${epa} 之「病人衛教」中，針對呼吸障礙病人之居家照護指導單張進行內容優化與衛教技巧演練。`
+                }
+            };
+
+            if (texts[feedbackType] && texts[feedbackType][sit]) {
+                return texts[feedbackType][sit];
+            }
+            return `針對 ${epa} 於 ${sit} 臨床情境中，學員展現扎實之呼吸治療專業素養與良好的執行表現。`;
+        }
+
+        // 產生完整 9 EPA × 11 固定情境 × 3 回饋面向 = 297 個 EPA templates，外加 3 個其他類範本共 300 筆
         function generateDefaultTemplates() {
             const epas = ["EPA 1", "EPA 3", "EPA 5", "EPA 6", "EPA 7", "EPA 8", "EPA 9", "EPA 10", "EPA 11"];
-            const situations = ["Alarm Troubleshooting", "Weaning", "呼吸評估"];
+            const fixedSituations = [
+                "呼吸評估",
+                "呼吸器設定",
+                "Alarm Troubleshooting",
+                "Weaning",
+                "NIV",
+                "ABG 判讀",
+                "Airway / 人工氣道",
+                "Emergency",
+                "Communication",
+                "Teamwork",
+                "病人衛教"
+            ];
+            const feedbackTypes = ["做得好", "待加強", "下一步"];
             let templates = [];
             let counter = 1;
 
             epas.forEach(epa => {
-                situations.forEach(sit => {
-                    templates.push({
-                        template_id: `TPL_${String(counter++).padStart(3, '0')}`,
-                        assessment_type: "EPA",
-                        assessment_item: epa,
-                        clinical_situation: sit,
-                        feedback_type: "做得好",
-                        template_text: `針對 ${epa} 於 ${sit} 情境中，學員展現清晰的邏輯與紮實的執行技巧，能主動應對臨床變異。`,
-                        active: true,
-                        created_by: currentUser.uid,
-                        updated_by: currentUser.uid,
-                        created_at: null,
-                        updated_at: null
-                    });
-                    templates.push({
-                        template_id: `TPL_${String(counter++).padStart(3, '0')}`,
-                        assessment_type: "EPA",
-                        assessment_item: epa,
-                        clinical_situation: sit,
-                        feedback_type: "待加強",
-                        template_text: `在 ${epa} 執行 ${sit} 過程時，對於細節的掌握度與流暢度可再加強，優先順序的判斷需更具全面性。`,
-                        active: true,
-                        created_by: currentUser.uid,
-                        updated_by: currentUser.uid,
-                        created_at: null,
-                        updated_at: null
-                    });
-                    templates.push({
-                        template_id: `TPL_${String(counter++).padStart(3, '0')}`,
-                        assessment_type: "EPA",
-                        assessment_item: epa,
-                        clinical_situation: sit,
-                        feedback_type: "下一步",
-                        template_text: `建議後續在 ${epa} 之 ${sit} 臨床實作中，多加強獨立處置之應變能力並深化相關機轉學理。`,
-                        active: true,
-                        created_by: currentUser.uid,
-                        updated_by: currentUser.uid,
-                        created_at: null,
-                        updated_at: null
+                fixedSituations.forEach(sit => {
+                    feedbackTypes.forEach(fType => {
+                        templates.push({
+                            template_id: `TPL_${String(counter++).padStart(3, '0')}`,
+                            assessment_type: "EPA",
+                            assessment_item: epa,
+                            clinical_situation: sit,
+                            feedback_type: fType,
+                            template_text: getDetailedTemplateText(epa, sit, fType),
+                            active: true,
+                            created_by: currentUser.uid,
+                            updated_by: currentUser.uid,
+                            created_at: null,
+                            updated_at: null
+                        });
                     });
                 });
             });
 
+            // 加上 CBD, Mini-CEX, SIRIPPP 基本範本
             templates.push({
                 template_id: `TPL_${String(counter++).padStart(3, '0')}`,
                 assessment_type: "CBD",
@@ -433,14 +475,28 @@
                 updated_at: null
             });
 
+            // Console 檢查確認數量
+            const epaCount = templates.filter(t => t.assessment_type === "EPA").length;
+            console.log("EPA default templates:", epaCount);
+            console.log("Total templates:", templates.length);
+
             return templates;
         }
 
-        // --- LocalStorage 讀寫管理（含 Assessment Events 與 Feedback Records 雙層結構及向後相容） ---
+        // --- LocalStorage 讀寫管理（含 Template Schema Version / Migration 機制） ---
         function getStoredTemplates() {
             try {
+                const storedVersion = localStorage.getItem("pgy_feedback_templates_version");
                 const data = localStorage.getItem("pgy_feedback_templates");
-                if (!data) return generateDefaultTemplates();
+
+                if (storedVersion !== TEMPLATE_SCHEMA_VERSION || !data) {
+                    // 版本不符或無資料：重新建立新版 default templates 並更新版本號
+                    const newTemplates = generateDefaultTemplates();
+                    saveTemplates(newTemplates);
+                    localStorage.setItem("pgy_feedback_templates_version", TEMPLATE_SCHEMA_VERSION);
+                    return newTemplates;
+                }
+
                 const parsed = JSON.parse(data);
                 return parsed.map(t => ({
                     ...t,
@@ -451,7 +507,10 @@
                 }));
             } catch (e) {
                 console.error("Templates localStorage error:", e);
-                return generateDefaultTemplates();
+                const fallbackTemplates = generateDefaultTemplates();
+                saveTemplates(fallbackTemplates);
+                localStorage.setItem("pgy_feedback_templates_version", TEMPLATE_SCHEMA_VERSION);
+                return fallbackTemplates;
             }
         }
 
@@ -471,7 +530,6 @@
                 if (data) {
                     return JSON.parse(data);
                 }
-                // 向後相容：若無獨立 pgy_assessment_events，從既有 pgy_feedback_records 匯出補齊
                 const records = getStoredRecords();
                 const eventsMap = {};
                 records.forEach(r => {
@@ -533,7 +591,7 @@
         document.addEventListener("DOMContentLoaded", () => {
             initFormSelects();
             initTabs();
-            setLocalDefaultDate(); // 使用台灣本地時間取得今天日期
+            setLocalDefaultDate();
             renderRecords();
             renderEPortfolioList();
             renderTemplates();
@@ -576,7 +634,6 @@
                 updateExistingEventOptions();
             });
 
-            // 事件模式切換監聽
             document.querySelectorAll("input[name='event-mode']").forEach(radio => {
                 radio.addEventListener("change", (e) => {
                     const existingContainer = document.getElementById("existing-event-container");
@@ -589,7 +646,6 @@
                 });
             });
 
-            // 回饋面向按鈕點擊事件
             const feedbackBtns = document.querySelectorAll(".feedback-type-btn");
             feedbackBtns.forEach(btn => {
                 btn.addEventListener("click", (e) => {
@@ -644,7 +700,6 @@
             });
         }
 
-        // 台灣本地時間取得今天日期 (YYYY-MM-DD)，避免 UTC 導致凌晨日期落差
         function setLocalDefaultDate() {
             const now = new Date();
             const year = now.getFullYear();
@@ -689,7 +744,6 @@
                 return;
             }
 
-            // 優先從 pgy_assessment_events 取得既有事件清單
             const assessmentEvents = getStoredAssessmentEvents();
             const records = getStoredRecords();
 
@@ -707,7 +761,6 @@
             }
 
             matchingEvents.forEach(ev => {
-                // 計算該事件已有幾位導師回饋
                 const mentorCount = records.filter(r => r.assessment_id === ev.assessment_id).length;
                 selectEl.innerHTML += `<option value="${ev.assessment_id}">[${ev.assessment_id}] 日期:${ev.date} | 情境:${ev.clinical_situation} (已有 ${mentorCount} 位導師回饋)</option>`;
             });
@@ -764,7 +817,7 @@
             });
         }
 
-        // --- 5. 儲存與記錄處理 (獨立 Assessment Event 與 Feedback Record 雙層架構處理) ---
+        // --- 5. 儲存與記錄處理 ---
         function handleFormSubmit(e) {
             e.preventDefault();
 
@@ -805,7 +858,6 @@
                 }
                 assessmentId = existingSelectVal;
             } else {
-                // 建立新的評核事件：產生獨立 Assessment Event object 並存入 pgy_assessment_events
                 const existingEventIds = [...new Set(assessmentEvents
                     .filter(ev => ev.assessment_id && ev.assessment_id.startsWith(basePrefix) && ev.assessment_type === assessmentType)
                     .map(ev => ev.assessment_id))];
@@ -820,7 +872,7 @@
                     assessment_item: assessmentItem,
                     clinical_situation: clinicalSituation,
                     date: date,
-                    created_by: currentUser.uid, // Firebase-ready: Firestore Security Rules tracking
+                    created_by: currentUser.uid,
                     created_at: new Date().toISOString()
                 };
 
@@ -828,7 +880,6 @@
                 saveAssessmentEvents(assessmentEvents);
             }
 
-            // 建立對應的 Feedback Record 存入 pgy_feedback_records
             const newRecord = {
                 assessment_id: assessmentId,
                 feedback_id: 'FB_' + Date.now() + '_' + Math.floor(Math.random()*1000),
@@ -839,11 +890,11 @@
                 clinical_situation: clinicalSituation,
                 date: date,
                 mentor: mentor,
-                mentor_uid: currentUser.uid,   // Firebase-ready: mentor UID from auth
+                mentor_uid: currentUser.uid,
                 feedback_type: feedbackType,
                 feedback_text: feedbackText,
                 ep_portfolio_status: 'pending',
-                created_by: currentUser.uid,   // Firebase-ready: Firestore Security Rules owner tracking
+                created_by: currentUser.uid,
                 created_at: new Date().toISOString()
             };
 
@@ -852,7 +903,6 @@
 
             showQuickCopyCard(newRecord);
 
-            // 重置表單
             document.getElementById("clinical-situation-select").value = "";
             document.getElementById("clinical-situation-other").value = "";
             document.getElementById("clinical-situation-other").classList.add("hidden");
@@ -1053,7 +1103,7 @@ ${r.feedback_text}`;
             `).join('');
         }
 
-        // --- 8. 罐頭管理渲染與持久化 (Firebase-ready 結構) ---
+        // --- 8. 罐頭管理渲染與持久化 ---
         function renderTemplates() {
             const category = document.getElementById("template-filter-category").value;
             const container = document.getElementById("templates-list");
@@ -1100,7 +1150,9 @@ ${r.feedback_text}`;
         }
 
         function updateTemplateText(id) {
-            const newText = document.getElementById(`tpl-text-${id}`).value;
+            const newNameInput = document.getElementById(`tpl-text-${id}`);
+            if (!newNameInput) return;
+            const newText = newNameInput.value;
             feedbackTemplates = feedbackTemplates.map(t => {
                 if (t.template_id === id) {
                     t.template_text = newText;
