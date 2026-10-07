@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>PGY 臨床質性回饋</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                 "Noto Sans TC", sans-serif;
+    background: #f4f6f8;
+    color: #263238;
+}
+
+.header {
+    background: #16324f;
+    color: white;
+    padding: 18px 20px;
+}
+
+.header-title {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.header-subtitle {
+    font-size: 13px;
+    margin-top: 4px;
+    opacity: 0.85;
+}
+
+.container {
+    max-width: 720px;
+    margin: auto;
+    padding: 18px;
+}
+
+.card {
+    background: white;
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+select,
+textarea,
+input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cfd8dc;
+    border-radius: 8px;
+    font-size: 16px;
+    background: white;
+}
+
+select {
+    margin-bottom: 14px;
+}
+
+textarea {
+    min-height: 180px;
+    resize: vertical;
+    line-height: 1.7;
+}
+
+.feedback-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.feedback-button {
+    border: 1px solid #cfd8dc;
+    background: white;
+    padding: 12px 6px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.feedback-button.active {
+    background: #e3f2fd;
+    border-color: #1976d2;
+    color: #1565c0;
+    font-weight: 700;
+}
+
+.primary-button {
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    padding: 15px;
+    background: #1976d2;
+    color: white;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 12px;
+}
+
+.secondary-button {
+    width: 100%;
+    border: 1px solid #1976d2;
+    border-radius: 10px;
+    padding: 13px;
+    background: white;
+    color: #1976d2;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.status {
+    text-align: center;
+    padding: 10px;
+    font-size: 14px;
+    color: #2e7d32;
+    display: none;
+}
+
+.small-note {
+    font-size: 12px;
+    color: #78909c;
+    margin-top: 5px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <div class="header-title">PGY 臨床質性回饋</div>
+    <div class="header-subtitle">
+        Clinical Feedback｜CBD · Mini-CEX · EPA · SIRIPPP
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- 基本資料 -->
+    <div class="card">
+
+        <div class="section-title">
+            ① 評核基本資料
+        </div>
+
+        <label>PGY 學員</label>
+        <select id="pgy">
+            <option value="">請選擇學員</option>
+            <option value="RT001">RT001 林○○</option>
+            <option value="RT002">RT002 李○○</option>
+            <option value="RT003">RT003 陳○○</option>
+            <option value="RT004">RT004 謝○○</option>
+            <option value="RT005">RT005 葉○○</option>
+            <option value="RT006">RT006 葉○○</option>
+        </select>
+
+        <label>評核類型</label>
+        <select id="assessmentType" onchange="updateAssessmentItems()">
+            <option value="">請選擇評核類型</option>
+            <option value="CBD">CBD</option>
+            <option value="Mini-CEX">Mini-CEX</option>
+            <option value="EPA">EPA</option>
+            <option value="SIRIPPP">SIRIPPP</option>
+        </select>
+
+        <label>評核項目</label>
+        <select id="assessmentItem">
+            <option value="">請先選擇評核類型</option>
+        </select>
+
+        <label>臨床導師</label>
+        <select id="mentor">
+            <option value="">請選擇臨床導師</option>
+            <option value="王老師">王老師</option>
+            <option value="林老師">林老師</option>
+            <option value="陳老師">陳老師</option>
+            <option value="其他導師">其他導師</option>
+        </select>
+
+        <label>評核日期</label>
+        <input type="date" id="date">
+
+    </div>
+
+
+    <!-- 回饋面向 -->
+    <div class="card">
+
+        <div class="section-title">
+            ② 回饋面向
+        </div>
+
+        <div class="feedback-buttons">
+
+            <button
+                class="feedback-button"
+                onclick="selectFeedbackType('做得好', this)">
+                做得好
+            </button>
+
+            <button
+                class="feedback-button"
+                onclick="selectFeedbackType('待加強', this)">
+                待加強
+            </button>
+
+            <button
+                class="feedback-button"
+                onclick="selectFeedbackType('下一步', this)">
+                下一步
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- 質性回饋 -->
+    <div class="card">
+
+        <div class="section-title">
+            ③ 質性回饋
+        </div>
+
+        <div class="small-note">
+            可直接修改下方文字，將罐頭回饋轉成個人化回饋。
+        </div>
+
+        <textarea
+            id="feedback"
+            placeholder="請輸入臨床觀察與質性回饋……"></textarea>
+
+        <button
+            class="secondary-button"
+            onclick="insertTemplate()">
+            ＋ 帶入回饋罐頭
+        </button>
+
+    </div>
+
+
+    <!-- 操作 -->
+    <div class="card">
+
+        <div class="section-title">
+            ④ 完成
+        </div>
+
+        <button
+            class="primary-button"
+            onclick="copyEP()">
+            📋 複製 E-Portfolio 格式
+        </button>
+
+        <button
+            class="secondary-button"
+            onclick="saveFeedback()">
+            💾 暫存本次回饋
+        </button>
+
+        <div id="status" class="status">
+            已複製，可貼到院內 E-Portfolio
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+let selectedFeedbackType = "";
+
+
+/* 評核項目 */
+function updateAssessmentItems() {
+
+    const type =
+        document.getElementById("assessmentType").value;
+
+    const select =
+        document.getElementById("assessmentItem");
+
+    select.innerHTML = "";
+
+    let items = [];
+
+    if (type === "CBD") {
+
+        items = [
+            "病例討論",
+            "Clinical Reasoning",
+            "Assessment / Plan"
+        ];
+
+    } else if (type === "Mini-CEX") {
+
+        items = [
+            "Clinical Assessment",
+            "Clinical Reasoning",
+            "Communication",
+            "Professionalism"
+        ];
+
+    } else if (type === "EPA") {
+
+        items = [
+            "EPA 1",
+            "EPA 3",
+            "EPA 5",
+            "EPA 6",
+            "EPA 7",
+            "EPA 8",
+            "EPA 9",
+            "EPA 10",
+            "EPA 11"
+        ];
+
+    } else if (type === "SIRIPPP") {
+
+        items = [
+            "病人照護",
+            "臨床推理",
+            "溝通",
+            "團隊合作",
+            "專業素養"
+        ];
+    }
+
+    if (items.length === 0) {
+
+        const option =
+            document.createElement("option");
+
+        option.textContent =
+            "請先選擇評核類型";
+
+        select.appendChild(option);
+
+        return;
+    }
+
+    items.forEach(item => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = item;
+        option.textContent = item;
+
+        select.appendChild(option);
+    });
+}
+
+
+/* 回饋面向 */
+function selectFeedbackType(type, button) {
+
+    selectedFeedbackType = type;
+
+    document
+        .querySelectorAll(".feedback-button")
+        .forEach(btn => btn.classList.remove("active"));
+
+    button.classList.add("active");
+}
+
+
+/* 罐頭回饋 */
+function insertTemplate() {
+
+    const type =
+        document.getElementById("assessmentType").value;
+
+    const item =
+        document.getElementById("assessmentItem").value;
+
+    const feedback =
+        document.getElementById("feedback");
+
+    let text = "";
+
+    if (selectedFeedbackType === "做得好") {
+
+        text =
+        "能依據病人目前臨床狀況進行評估，並能說明相關臨床判斷與處置考量。";
+
+    } else if (selectedFeedbackType === "待加強") {
+
+        text =
+        "目前已能完成基本評估，建議持續加強臨床變化與處置之間的連結，並增加系統性判斷。";
+
+    } else if (selectedFeedbackType === "下一步") {
+
+        text =
+        "建議於後續臨床情境中持續練習，並逐步增加獨立判斷與處置的能力。";
+
+    } else {
+
+        alert("請先選擇「做得好／待加強／下一步」");
+
+        return;
+    }
+
+    feedback.value = text;
+}
+
+
+/* 複製 E-Portfolio */
+function copyEP() {
+
+    const pgy =
+        document.getElementById("pgy").value;
+
+    const type =
+        document.getElementById("assessmentType").value;
+
+    const item =
+        document.getElementById("assessmentItem").value;
+
+    const mentor =
+        document.getElementById("mentor").value;
+
+    const date =
+        document.getElementById("date").value;
+
+    const feedback =
+        document.getElementById("feedback").value;
+
+    if (!pgy || !type || !mentor || !date || !feedback) {
+
+        alert("請先完成基本資料與質性回饋。");
+
+        return;
+    }
+
+    const text =
+
+`評核項目：${type}
+評核內容：${item}
+評核日期：${date}
+臨床導師：${mentor}
+
+質性回饋：
+${feedback}`;
+
+    navigator.clipboard.writeText(text);
+
+    const status =
+        document.getElementById("status");
+
+    status.style.display = "block";
+
+    setTimeout(() => {
+
+        status.style.display = "none";
+
+    }, 3000);
+}
+
+
+/* 暫存 */
+function saveFeedback() {
+
+    const record = {
+
+        pgy:
+            document.getElementById("pgy").value,
+
+        assessmentType:
+            document.getElementById("assessmentType").value,
+
+        assessmentItem:
+            document.getElementById("assessmentItem").value,
+
+        mentor:
+            document.getElementById("mentor").value,
+
+        date:
+            document.getElementById("date").value,
+
+        feedbackType:
+            selectedFeedbackType,
+
+        feedback:
+            document.getElementById("feedback").value,
+
+        createdAt:
+            new Date().toISOString()
+    };
+
+    let records =
+        JSON.parse(
+            localStorage.getItem("pgyFeedbackRecords")
+        ) || [];
+
+    records.push(record);
+
+    localStorage.setItem(
+        "pgyFeedbackRecords",
+        JSON.stringify(records)
+    );
+
+    alert("本次回饋已暫存在此裝置。");
+}
+
+
+/* 預設今天 */
+document.getElementById("date").value =
+    new Date().toISOString().split("T")[0];
+
+</script>
+
+</body>
+</html>
