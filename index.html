@@ -29,7 +29,7 @@
                 <p class="text-xs text-blue-100">Clinical Feedback · CBD · Mini-CEX · EPA · SIRIPPP</p>
             </div>
             <div class="text-xs bg-blue-700 px-2.5 py-1 rounded-full border border-blue-500 font-medium">
-                RT 專用版 V2.5.1
+                RT 專用版 V2.6.1
             </div>
         </div>
     </header>
@@ -134,22 +134,53 @@
                         </div>
                     </div>
 
-                    <!-- Step 8: 回饋面向按鈕 -->
+                    <!-- Step 8: 回饋面向按鈕 (切換模組分類) -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Step 8: 選擇回饋面向 (點擊帶入罐頭)</label>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Step 8: 選擇回饋面向 (切換下方可用模組)</label>
                         <div class="grid grid-cols-3 gap-2">
-                            <button type="button" class="feedback-type-btn py-2 px-1 text-xs font-medium border border-slate-300 rounded-lg bg-white text-slate-700 hover:bg-blue-50 hover:border-blue-400 focus:bg-blue-600 focus:text-white transition-all shadow-sm" data-type="做得好">做得好</button>
-                            <button type="button" class="feedback-type-btn py-2 px-1 text-xs font-medium border border-slate-300 rounded-lg bg-white text-slate-700 hover:bg-blue-50 hover:border-blue-400 focus:bg-blue-600 focus:text-white transition-all shadow-sm" data-type="待加強">待加強</button>
-                            <button type="button" class="feedback-type-btn py-2 px-1 text-xs font-medium border border-slate-300 rounded-lg bg-white text-slate-700 hover:bg-blue-50 hover:border-blue-400 focus:bg-blue-600 focus:text-white transition-all shadow-sm" data-type="下一步">下一步</button>
+                            <button type="button" class="feedback-type-btn py-2 px-1 text-xs font-medium border border-blue-600 rounded-lg bg-blue-600 text-white transition-all shadow-sm" data-type="做得好">做得好</button>
+                            <button type="button" class="feedback-type-btn py-2 px-1 text-xs font-medium border border-slate-300 rounded-lg bg-white text-slate-700 hover:bg-blue-50 hover:border-blue-400 transition-all shadow-sm" data-type="待加強">待加強</button>
+                            <button type="button" class="feedback-type-btn py-2 px-1 text-xs font-medium border border-slate-300 rounded-lg bg-white text-slate-700 hover:bg-blue-50 hover:border-blue-400 transition-all shadow-sm" data-type="下一步">下一步</button>
                         </div>
-                        <input type="hidden" id="selected-feedback-type" value="">
+                        <input type="hidden" id="selected-feedback-type" value="做得好">
                     </div>
 
-                    <!-- Step 9 & 10: 罐頭套用與即時編輯 -->
+                    <!-- Step 9: 四大面向複選式模組清單 -->
+                    <div class="space-y-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <label class="block text-xs font-bold text-slate-700">Step 9：選擇回饋面向（可複選）</label>
+                        
+                        <!-- 類別 A -->
+                        <div class="space-y-1.5">
+                            <h3 class="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-1 rounded">A. 臨床評估與判斷</h3>
+                            <div id="domain-A-list" class="space-y-1 pl-1"></div>
+                        </div>
+
+                        <!-- 類別 B -->
+                        <div class="space-y-1.5 pt-1">
+                            <h3 class="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-1 rounded">B. 臨床操作與病人照護</h3>
+                            <div id="domain-B-list" class="space-y-1 pl-1"></div>
+                        </div>
+
+                        <!-- 類別 C -->
+                        <div class="space-y-1.5 pt-1">
+                            <h3 class="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-1 rounded">C. 溝通與團隊合作</h3>
+                            <div id="domain-C-list" class="space-y-1 pl-1"></div>
+                        </div>
+
+                        <!-- 類別 D -->
+                        <div class="space-y-1.5 pt-1">
+                            <h3 class="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-1 rounded">D. 學習態度與專業成長</h3>
+                            <div id="domain-D-list" class="space-y-1 pl-1"></div>
+                        </div>
+                    </div>
+
+                    <!-- Step 10: 質性回饋內容 (可直接修改) -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Step 9 & 10: 質性回饋內容 (可直接修改)</label>
-                        <textarea id="feedback-text" rows="4" placeholder="請依序選擇評核項目、情境與回饋面向帶入專用罐頭，或直接在此輸入個人化回饋..." required class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
-                        <p id="template-notice" class="text-[11px] text-amber-600 mt-1 hidden">目前尚無此臨床情境的專用罐頭，請直接輸入或編輯個人化回饋。</p>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-xs font-semibold text-slate-600">Step 9 & 10: 質性回饋內容 (可直接修改)</label>
+                            <button type="button" onclick="regenerateFeedbackText()" class="text-[11px] text-blue-600 hover:text-blue-800 font-medium underline">↻ 依目前勾選模組重新產生</button>
+                        </div>
+                        <textarea id="feedback-text" rows="5" placeholder="勾選上方模組自動組合，或直接在此輸入個人化回饋..." required class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
                     </div>
 
                     <!-- Step 11: 儲存按鈕 -->
@@ -239,16 +270,16 @@
         <!-- Tab 4: 罐頭管理 -->
         <section id="tab-templates" class="tab-content space-y-4">
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                <h2 class="text-base font-bold text-slate-700 mb-1">罐頭文字管理</h2>
-                <p class="text-xs text-slate-500 mb-3">檢視與維護各評核項目與情境之質性回饋罐頭範本（修改後自動儲存於此裝置）。</p>
+                <h2 class="text-base font-bold text-slate-700 mb-1">模組化回饋管理</h2>
+                <p class="text-xs text-slate-500 mb-3">檢視與維護 32 個核心回饋模組（修改後自動儲存於此裝置）。</p>
 
                 <div class="mb-3">
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">選擇評核分類檢視</label>
-                    <select id="template-filter-category" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm">
-                        <option value="EPA">EPA</option>
-                        <option value="CBD">CBD</option>
-                        <option value="Mini-CEX">Mini-CEX</option>
-                        <option value="SIRIPPP">SIRIPPP</option>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">選擇面向分類檢視</label>
+                    <select id="template-filter-domain" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm">
+                        <option value="臨床評估與判斷">臨床評估與判斷</option>
+                        <option value="臨床操作與病人照護">臨床操作與病人照護</option>
+                        <option value="溝通與團隊合作">溝通與團隊合作</option>
+                        <option value="學習態度與專業成長">學習態度與專業成長</option>
                     </select>
                 </div>
 
@@ -285,20 +316,18 @@
     <!-- JavaScript 邏輯 -->
     <script>
         // ==========================================
-        // RT 專用版 V2.5.1 Firebase-ready
-        // 獨立 Assessment Event 與 Feedback Record 雙層架構
-        // 含 Schema Version Migration 機制 (v2.5.1，共 300 筆高品質範本)
-        // 尚未連接 Firebase
+        // RT 專用版 V2.6.1 Modular Feedback
+        // 四大面向複選式質性回饋系統 (修正互動邏輯版)
         // ==========================================
 
-        const TEMPLATE_SCHEMA_VERSION = "2.5.1";
+        const TEMPLATE_SCHEMA_VERSION = "2.6.1";
 
-        // --- 集中管理目前登入使用者的身分物件 (Firebase-ready) ---
+        // 集中管理目前登入使用者的身分物件 (Firebase-ready)
         const currentUser = {
-            uid: null,              // Firebase-ready: will come from Firebase Authentication
-            name: null,             // Firebase-ready: user display name
-            role: "mentor",         // Firebase-ready: mentor, admin, pgy for Firestore Security Rules
-            authenticated: false    // Firebase-ready: auth status
+            uid: null,
+            name: null,
+            role: "mentor",
+            authenticated: false
         };
 
         // PGY 學員資料
@@ -328,170 +357,63 @@
             "SIRIPPP": ["S-情境評估", "I-背景交班", "R-評估建議", "I-執行確認", "P-防範對策", "P-預判反應", "P-成效追蹤"]
         };
 
-        // 常用臨床情境列表 (12 個選項)
-        const clinicalSituationsList = [
-            "呼吸評估",
-            "呼吸器設定",
-            "Alarm Troubleshooting",
-            "Weaning",
-            "NIV",
-            "ABG 判讀",
-            "Airway / 人工氣道",
-            "Emergency",
-            "Communication",
-            "Teamwork",
-            "病人衛教",
-            "其他"
-        ];
+        // 32 個核心回饋模組預設資料
+        function generateDefaultModularTemplates() {
+            return [
+                // A. 臨床評估與判斷 (A01 - A08)
+                { id: "A01", domain: "臨床評估與判斷", direction: ["做得好"], text: "能主動掌握病人目前臨床狀況，完成基本評估並提出適當處置方向。", active: true },
+                { id: "A02", domain: "臨床評估與判斷", direction: ["做得好"], text: "能整合生命徵象、檢驗數據及臨床表現，進行初步臨床判斷。", active: true },
+                { id: "A03", domain: "臨床評估與判斷", direction: ["做得好"], text: "能主動發現病人異常變化，並適時回報及尋求協助。", active: true },
+                { id: "A04", domain: "臨床評估與判斷", direction: ["做得好", "下一步"], text: "面對臨床問題時能嘗試分析原因，逐漸建立系統性的臨床思考能力。", active: true },
+                { id: "A05", domain: "臨床評估與判斷", direction: ["做得好"], text: "能依病人病況調整評估重點，具備基本的臨床優先順序概念。", active: true },
+                { id: "A06", domain: "臨床評估與判斷", direction: ["待加強", "下一步"], text: "對異常數據已有基本敏感度，建議持續加強數據與臨床症狀之間的連結。", active: true },
+                { id: "A07", domain: "臨床評估與判斷", direction: ["待加強", "下一步"], text: "臨床評估基本能力已建立，後續可加強鑑別問題及判斷處置優先順序。", active: true },
+                { id: "A08", domain: "臨床評估與判斷", direction: ["待加強", "下一步"], text: "面對複雜臨床情境時仍需更多指導，建議持續累積個案經驗並練習臨床推理。", active: true },
 
-        // 針對不同情境與回饋面向提供精確、符合呼吸治療師 PGY 教學語境的優化回饋內容
-        function getDetailedTemplateText(epa, sit, feedbackType) {
-            const texts = {
-                "做得好": {
-                    "呼吸評估": `在 ${epa} 之「呼吸評估」中，學員能完整且有條理地收集呼吸道與呼吸運動表徵，呼吸音聽診與觸覺震顫判讀精準。`,
-                    "呼吸器設定": `在 ${epa} 之「呼吸器設定」中，學員能根據病人之肺部力學與血氧狀態，安全且正確地設定初始參數與保護性通氣策略。`,
-                    "Alarm Troubleshooting": `在 ${epa} 之「Alarm Troubleshooting」中，學員展現優秀的危機處理能力，迅速定位氣道阻塞或管路漏氣等警報根因並排除。`,
-                    "Weaning": `在 ${epa} 之「Weaning」中，學員能詳實評估自主呼吸試驗（SBT）指標，對呼吸肌耐力與脫離時機的掌握度極佳。`,
-                    "NIV": `在 ${epa} 之「NIV」中，學員能正確調整面罩密合度與正壓通氣參數，並有效指導病人配合呼吸節奏，降低焦慮。`,
-                    "ABG 判讀": `在 ${epa} 之「ABG 判讀」中，學員能迅速且正確地分析氣體交換與酸鹼平衡狀態，並提出合乎病理生理學的處置建議。`,
-                    "Airway / 人工氣道": `在 ${epa} 之「Airway / 人工氣道」中學員操作無菌抽痰與管路固定技術純熟，氣道深度與氣囊壓力監測落實。`,
-                    "Emergency": `在 ${epa} 之「Emergency」情境中，學員臨危不亂，在呼吸道緊急狀況下能主動配合團隊執行正壓給氧與急救流程。`,
-                    "Communication": `在 ${epa} 之「Communication」中，學員向醫療團隊交班時口條清晰、重點突出，能有效傳遞病人呼吸照護關鍵訊息。`,
-                    "Teamwork": `在 ${epa} 之「Teamwork」中，學員主動與護理及醫師團隊協同合作，展現良好的呼吸治療專業價值與溝通協調力。`,
-                    "病人衛教": `在 ${epa} 之「病人衛教」中，學員能以通俗易懂的語言向病人家屬說明呼吸器使用目的與咳嗽排痰技巧，態度親切具同理心。`
-                },
-                "待加強": {
-                    "呼吸評估": `在 ${epa} 之「呼吸評估」中，對於呼吸困難病人的視診與聽診細節可再深入，部分微小呼吸音的辨識需加強。`,
-                    "呼吸器設定": `在 ${epa} 之「呼吸器設定」中，對於特定病理狀態（如嚴重阻絕性肺病）的參數微調邏輯，建議再多思考安全性與順應性。`,
-                    "Alarm Troubleshooting": `在 ${epa} 之「Alarm Troubleshooting」中，面對複合型警報時排查步驟稍顯慌亂，建議建立系統化的逐步排除SOP。`,
-                    "Weaning": `在 ${epa} 之「Weaning」中，對於脫離指標（如RSBI）的動態變化追蹤不夠全面，評估病人耐受度時可再敏銳一些。`,
-                    "NIV": `在 ${epa} 之「NIV」中，對於面罩壓迫點的皮膚保護與病人面部漏氣的即時處置反應速度需再提昇。`,
-                    "ABG 判讀": `在 ${epa} 之「ABG 判讀」中，對於代償機轉的判讀邏輯偶有混淆，建議加強複合型酸鹼失衡的推導訓練。`,
-                    "Airway / 人工氣道": `在 ${epa} 之「Airway / 人工氣道」中，無菌操作的流暢度與手部衛生細節需再落實，避免潛在感染風險。`,
-                    "Emergency": `在 ${epa} 之「Emergency」中，於高度壓力環境下之任務分工與器材準備速度需要更俐落的主動性。`,
-                    "Communication": `在 ${epa} 之「Communication」中，交班結構化表達（如 SBAR）的精煉度可再加強，避免遺漏關鍵呼吸參數。`,
-                    "Teamwork": `在 ${epa} 之「Teamwork」中，跨團隊溝通時的主動回報與同步訊息傳遞可以更具前瞻性。`,
-                    "病人衛教": `在 ${epa} 之「病人衛教」中，向家屬說明衛教內容時專有名詞較多，建議多轉換為病人易懂的日常語言。`
-                },
-                "下一步": {
-                    "呼吸評估": `建議後續在 ${epa} 之「呼吸評估」中，多接觸多變化的胸腔疾病個案，強化動態呼吸型態變化的鑑別能力。`,
-                    "呼吸器設定": `建議後續在 ${epa} 之「呼吸器設定」中，深入研讀進階呼吸模式（如 APRV 或 PAV）的生理機轉與臨床適應症。`,
-                    "Alarm Troubleshooting": `建議後續在 ${epa} 之「Alarm Troubleshooting」中，累積更多呼吸器機械故障與管路異常之實際排修經驗。`,
-                    "Weaning": `建議後續在 ${epa} 之「Weaning」中，積極參與長期呼吸器依賴病人的脫離計畫擬定與多專科照護討論。`,
-                    "NIV": `建議後續在 ${epa} 之「NIV」中，針對不同呼吸器品牌之非侵襲性設定介面與漏氣補償機制進行比較學習。`,
-                    "ABG 判讀": `建議後續在 ${epa} 之「ABG 判讀」中，結合血行動力學監測數據，進行更全面的氧合與通氣效能綜合評估。`,
-                    "Airway / 人工氣道": `建議後續在 ${epa} 之「Airway / 人工氣道」中，進一步觀摩並學習困難氣道處理設備（如氣管鏡）的準備與配合。`,
-                    "Emergency": `建議後續在 ${epa} 之「Emergency」中，參與高級呼吸道救命術（ACLS / RRT）模擬訓練，增進高壓情境的心理韌性。`,
-                    "Communication": `建議後續在 ${epa} 之「Communication」中，主動練習跨團隊交班與病情變化之危急通報演練。`,
-                    "Teamwork": `建議後續在 ${epa} 之「Teamwork」中，學習在呼吸照護團隊中擔任協調與主動回報的核心角色。`,
-                    "病人衛教": `建議後續在 ${epa} 之「病人衛教」中，針對呼吸障礙病人之居家照護指導單張進行內容優化與衛教技巧演練。`
-                }
-            };
+                // B. 臨床操作與病人照護 (B01 - B08)
+                { id: "B01", domain: "臨床操作與病人照護", direction: ["做得好"], text: "能依標準流程完成臨床操作，過程穩定並能注意病人安全。", active: true },
+                { id: "B02", domain: "臨床操作與病人照護", direction: ["做得好"], text: "操作前能確認病人狀況及相關設備，操作後能主動觀察病人反應。", active: true },
+                { id: "B03", domain: "臨床操作與病人照護", direction: ["做得好"], text: "能依病人實際狀況調整照護方式，具備基本的臨床應變能力。", active: true },
+                { id: "B04", domain: "臨床操作與病人照護", direction: ["做得好", "待加強"], text: "操作過程能注意細節，並能依指導修正操作方式。", active: true },
+                { id: "B05", domain: "臨床操作與病人照護", direction: ["做得好"], text: "已具備基本臨床操作能力，操作熟練度持續提升中。", active: true },
+                { id: "B06", domain: "臨床操作與病人照護", direction: ["做得好"], text: "遇到異常狀況時能維持基本處置流程，並適時尋求協助。", active: true },
+                { id: "B07", domain: "臨床操作與病人照護", direction: ["待加強", "下一步"], text: "操作流程大致正確，建議進一步加強操作前、中、後的完整性確認。", active: true },
+                { id: "B08", domain: "臨床操作與病人照護", direction: ["待加強", "下一步"], text: "對設備及操作細節仍需增加熟悉度，建議透過實際個案持續練習。", active: true },
 
-            if (texts[feedbackType] && texts[feedbackType][sit]) {
-                return texts[feedbackType][sit];
-            }
-            return `針對 ${epa} 於 ${sit} 臨床情境中，學員展現扎實之呼吸治療專業素養與良好的執行表現。`;
-        }
+                // C. 溝通與團隊合作 (C01 - C08)
+                { id: "C01", domain: "溝通與團隊合作", direction: ["做得好"], text: "能主動與醫療團隊溝通病人狀況，重要資訊傳達清楚。", active: true },
+                { id: "C02", domain: "溝通與團隊合作", direction: ["做得好"], text: "能適時向學長姐或指導教師提出問題，具備良好的學習主動性。", active: true },
+                { id: "C03", domain: "溝通與團隊合作", direction: ["做得好"], text: "能針對病人重要變化進行適當回報，具備基本的團隊溝通能力。", active: true },
+                { id: "C04", domain: "溝通與團隊合作", direction: ["做得好"], text: "與病人及家屬互動態度適當，能以容易理解的方式進行說明。", active: true },
+                { id: "C05", domain: "溝通與團隊合作", direction: ["做得好"], text: "能配合團隊工作安排，並主動完成所負責的臨床工作。", active: true },
+                { id: "C06", domain: "溝通與團隊合作", direction: ["做得好"], text: "團隊合作表現穩定，遇到問題能主動尋求協助並與團隊討論。", active: true },
+                { id: "C07", domain: "溝通與團隊合作", direction: ["待加強", "下一步"], text: "建議進一步練習臨床資訊的整理與表達順序，使重要資訊能更快速傳達。", active: true },
+                { id: "C08", domain: "溝通與團隊合作", direction: ["待加強", "下一步"], text: "面對不同專業團隊成員時，可再加強溝通技巧與主動表達臨床觀察的能力。", active: true },
 
-        // 產生完整 9 EPA × 11 固定情境 × 3 回饋面向 = 297 個 EPA templates，外加 3 個其他類範本共 300 筆
-        function generateDefaultTemplates() {
-            const epas = ["EPA 1", "EPA 3", "EPA 5", "EPA 6", "EPA 7", "EPA 8", "EPA 9", "EPA 10", "EPA 11"];
-            const fixedSituations = [
-                "呼吸評估",
-                "呼吸器設定",
-                "Alarm Troubleshooting",
-                "Weaning",
-                "NIV",
-                "ABG 判讀",
-                "Airway / 人工氣道",
-                "Emergency",
-                "Communication",
-                "Teamwork",
-                "病人衛教"
+                // D. 學習態度與專業成長 (D01 - D08)
+                { id: "D01", domain: "學習態度與專業成長", direction: ["做得好"], text: "學習態度積極，能主動接受回饋並應用於後續臨床工作。", active: true },
+                { id: "D02", domain: "學習態度與專業成長", direction: ["做得好", "下一步"], text: "能從臨床個案中發現學習問題，並主動尋找相關資料。", active: true },
+                { id: "D03", domain: "學習態度與專業成長", direction: ["做得好"], text: "面對不熟悉的臨床情境能主動求助，並能依指導完成後續處置。", active: true },
+                { id: "D04", domain: "學習態度與專業成長", direction: ["做得好"], text: "能將教學內容與實際臨床個案連結，逐漸建立自己的學習架構。", active: true },
+                { id: "D05", domain: "學習態度與專業成長", direction: ["做得好"], text: "接受回饋後能主動修正，後續臨床表現可見進步。", active: true },
+                { id: "D06", domain: "學習態度與專業成長", direction: ["做得好"], text: "已具備良好的學習態度，建議持續累積臨床經驗並提升獨立處理能力。", active: true },
+                { id: "D07", domain: "學習態度與專業成長", direction: ["待加強", "下一步"], text: "對部分臨床問題仍較依賴指導，建議增加主動思考及事前準備。", active: true },
+                { id: "D08", domain: "學習態度與專業成長", direction: ["待加強", "下一步"], text: "建議將每次臨床回饋轉化為下一次照護的具體行動，持續追蹤自己的成長。", active: true }
             ];
-            const feedbackTypes = ["做得好", "待加強", "下一步"];
-            let templates = [];
-            let counter = 1;
-
-            epas.forEach(epa => {
-                fixedSituations.forEach(sit => {
-                    feedbackTypes.forEach(fType => {
-                        templates.push({
-                            template_id: `TPL_${String(counter++).padStart(3, '0')}`,
-                            assessment_type: "EPA",
-                            assessment_item: epa,
-                            clinical_situation: sit,
-                            feedback_type: fType,
-                            template_text: getDetailedTemplateText(epa, sit, fType),
-                            active: true,
-                            created_by: currentUser.uid,
-                            updated_by: currentUser.uid,
-                            created_at: null,
-                            updated_at: null
-                        });
-                    });
-                });
-            });
-
-            // 加上 CBD, Mini-CEX, SIRIPPP 基本範本
-            templates.push({
-                template_id: `TPL_${String(counter++).padStart(3, '0')}`,
-                assessment_type: "CBD",
-                assessment_item: "人工呼吸器參數調整與解析",
-                clinical_situation: "呼吸器設定",
-                feedback_type: "做得好",
-                template_text: "能根據肺部保護策略正確調整潮氣容積與 PEEP，邏輯清晰。",
-                active: true,
-                created_by: currentUser.uid,
-                updated_by: currentUser.uid,
-                created_at: null,
-                updated_at: null
-            });
-            templates.push({
-                template_id: `TPL_${String(counter++).padStart(3, '0')}`,
-                assessment_type: "Mini-CEX",
-                assessment_item: "動脈血液氣體分析判讀",
-                clinical_situation: "ABG 判讀",
-                feedback_type: "做得好",
-                template_text: "迅速且正確判讀 ABG 結果，並能提出合理的呼吸器調整建議。",
-                active: true,
-                created_by: currentUser.uid,
-                updated_by: currentUser.uid,
-                created_at: null,
-                updated_at: null
-            });
-            templates.push({
-                template_id: `TPL_${String(counter++).padStart(3, '0')}`,
-                assessment_type: "SIRIPPP",
-                assessment_item: "S-情境評估",
-                clinical_situation: "Communication",
-                feedback_type: "做得好",
-                template_text: "交班結構清晰，能掌握病人之關鍵生理數值與呼吸器狀態。",
-                active: true,
-                created_by: currentUser.uid,
-                updated_by: currentUser.uid,
-                created_at: null,
-                updated_at: null
-            });
-
-            // Console 檢查確認數量
-            const epaCount = templates.filter(t => t.assessment_type === "EPA").length;
-            console.log("EPA default templates:", epaCount);
-            console.log("Total templates:", templates.length);
-
-            return templates;
         }
 
-        // --- LocalStorage 讀寫管理（含 Template Schema Version / Migration 機制） ---
+        // V2.6.1 模組化選取狀態保存變數
+        let selectedFeedbackModuleIds = new Set();
+        let lastGeneratedFeedbackText = "";
+
+        // LocalStorage 管理與 Migration 機制 (V2.6.1)
         function getStoredTemplates() {
             try {
                 const storedVersion = localStorage.getItem("pgy_feedback_templates_version");
                 const data = localStorage.getItem("pgy_feedback_templates");
 
                 if (storedVersion !== TEMPLATE_SCHEMA_VERSION || !data) {
-                    // 版本不符或無資料：重新建立新版 default templates 並更新版本號
-                    const newTemplates = generateDefaultTemplates();
+                    const newTemplates = generateDefaultModularTemplates();
                     saveTemplates(newTemplates);
                     localStorage.setItem("pgy_feedback_templates_version", TEMPLATE_SCHEMA_VERSION);
                     return newTemplates;
@@ -500,17 +422,14 @@
                 const parsed = JSON.parse(data);
                 return parsed.map(t => ({
                     ...t,
-                    created_by: t.created_by ?? null,
-                    updated_by: t.updated_by ?? null,
-                    created_at: t.created_at ?? null,
-                    updated_at: t.updated_at ?? null
+                    active: t.active ?? true
                 }));
             } catch (e) {
                 console.error("Templates localStorage error:", e);
-                const fallbackTemplates = generateDefaultTemplates();
-                saveTemplates(fallbackTemplates);
+                const fallback = generateDefaultModularTemplates();
+                saveTemplates(fallback);
                 localStorage.setItem("pgy_feedback_templates_version", TEMPLATE_SCHEMA_VERSION);
-                return fallbackTemplates;
+                return fallback;
             }
         }
 
@@ -518,7 +437,7 @@
             try {
                 localStorage.setItem("pgy_feedback_templates", JSON.stringify(templates));
             } catch (e) {
-                alert("罐頭儲存失敗，瀏覽器容量可能已滿。");
+                alert("模組儲存失敗，瀏覽器容量可能已滿。");
             }
         }
 
@@ -527,9 +446,7 @@
         function getStoredAssessmentEvents() {
             try {
                 const data = localStorage.getItem("pgy_assessment_events");
-                if (data) {
-                    return JSON.parse(data);
-                }
+                if (data) return JSON.parse(data);
                 const records = getStoredRecords();
                 const eventsMap = {};
                 records.forEach(r => {
@@ -550,7 +467,7 @@
                 saveAssessmentEvents(events);
                 return events;
             } catch (e) {
-                console.error("Assessment Events localStorage error:", e);
+                console.error("Assessment Events error:", e);
                 return [];
             }
         }
@@ -559,7 +476,7 @@
             try {
                 localStorage.setItem("pgy_assessment_events", JSON.stringify(events));
             } catch (e) {
-                alert("評核事件儲存失敗，瀏覽器容量可能已滿。");
+                alert("評核事件儲存失敗。");
             }
         }
 
@@ -570,11 +487,10 @@
                 const parsed = JSON.parse(data);
                 return parsed.map(r => ({
                     ...r,
-                    mentor_uid: r.mentor_uid ?? null,
-                    created_by: r.created_by ?? null
+                    feedback_module_ids: r.feedback_module_ids || []
                 }));
             } catch (e) {
-                console.error("Records localStorage error:", e);
+                console.error("Records error:", e);
                 return [];
             }
         }
@@ -583,27 +499,25 @@
             try {
                 localStorage.setItem("pgy_feedback_records", JSON.stringify(records));
             } catch (e) {
-                alert("回饋紀錄儲存失敗，瀏覽器容量可能已滿。");
+                alert("回饋紀錄儲存失敗。");
             }
         }
 
-        // --- 2. 初始化與 DOM 載入 ---
         document.addEventListener("DOMContentLoaded", () => {
             initFormSelects();
             initTabs();
             setLocalDefaultDate();
+            renderStep9Checkboxes();
             renderRecords();
             renderEPortfolioList();
             renderTemplates();
 
-            // 監聽事件
             document.getElementById("assessment-type").addEventListener("change", () => {
                 updateAssessmentItems();
                 updateExistingEventOptions();
             });
             
             document.getElementById("assessment-item").addEventListener("change", () => {
-                tryLoadTemplate();
                 updateExistingEventOptions();
             });
 
@@ -625,12 +539,6 @@
                     otherInput.required = false;
                     otherInput.value = "";
                 }
-                tryLoadTemplate();
-                updateExistingEventOptions();
-            });
-
-            document.getElementById("clinical-situation-other").addEventListener("input", () => {
-                tryLoadTemplate();
                 updateExistingEventOptions();
             });
 
@@ -646,6 +554,7 @@
                 });
             });
 
+            // Step 8 按鈕切換 (切換方向不清除已選模組)
             const feedbackBtns = document.querySelectorAll(".feedback-type-btn");
             feedbackBtns.forEach(btn => {
                 btn.addEventListener("click", (e) => {
@@ -659,7 +568,7 @@
                     const fType = e.target.getAttribute("data-type");
                     document.getElementById("selected-feedback-type").value = fType;
                     
-                    tryLoadTemplate();
+                    renderStep9Checkboxes();
                 });
             });
 
@@ -680,10 +589,10 @@
                 renderEPortfolioList("all");
             });
 
-            document.getElementById("template-filter-category").addEventListener("change", renderTemplates);
+            document.getElementById("template-filter-domain").addEventListener("change", renderTemplates);
         });
 
-        // --- 3. 表單初始化與動態選項更新 ---
+        // 初始化表單選項
         function initFormSelects() {
             const pgySelect = document.getElementById("pgy-select");
             const filterPgy = document.getElementById("filter-pgy");
@@ -705,8 +614,7 @@
             const year = now.getFullYear();
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const day = String(now.getDate()).padStart(2, '0');
-            const localToday = `${year}-${month}-${day}`;
-            document.getElementById("feedback-date").value = localToday;
+            document.getElementById("feedback-date").value = `${year}-${month}-${day}`;
         }
 
         function updateAssessmentItems() {
@@ -719,7 +627,6 @@
                     itemSelect.innerHTML += `<option value="${item}">${item}</option>`;
                 });
             }
-            tryLoadTemplate();
         }
 
         function getSelectedClinicalSituation() {
@@ -740,9 +647,7 @@
 
             selectEl.innerHTML = '<option value="">-- 請選擇符合條件的既有評核事件 --</option>';
 
-            if (!pgyId || !assessmentType || !assessmentItem || !date) {
-                return;
-            }
+            if (!pgyId || !assessmentType || !assessmentItem || !date) return;
 
             const assessmentEvents = getStoredAssessmentEvents();
             const records = getStoredRecords();
@@ -766,40 +671,93 @@
             });
         }
 
-        function tryLoadTemplate() {
-            const type = document.getElementById("assessment-type").value;
-            const item = document.getElementById("assessment-item").value;
-            const situation = getSelectedClinicalSituation();
-            const feedbackType = document.getElementById("selected-feedback-type").value;
-            const textArea = document.getElementById("feedback-text");
-            const noticeEl = document.getElementById("template-notice");
+        // 渲染 Step 9 四大面向 Checkbox 列表 (依 selectedFeedbackModuleIds 恢復 checked 狀態)
+        function renderStep9Checkboxes() {
+            const currentDirection = document.getElementById("selected-feedback-type").value;
+            
+            const domains = {
+                "臨床評估與判斷": "domain-A-list",
+                "臨床操作與病人照護": "domain-B-list",
+                "溝通與團隊合作": "domain-C-list",
+                "學習態度與專業成長": "domain-D-list"
+            };
 
-            if (!type || !item || !situation || !feedbackType) {
-                return;
-            }
+            for (const [domainName, containerId] of Object.entries(domains)) {
+                const container = document.getElementById(containerId);
+                const items = feedbackTemplates.filter(t => t.domain === domainName && t.active);
 
-            const found = feedbackTemplates.find(t => 
-                t.assessment_type === type && 
-                t.assessment_item === item && 
-                t.clinical_situation === situation && 
-                t.feedback_type === feedbackType && 
-                t.active
-            );
-
-            if (found) {
-                textArea.value = found.template_text;
-                if (noticeEl) noticeEl.classList.add("hidden");
-            } else {
-                textArea.value = "";
-                if (noticeEl) noticeEl.classList.remove("hidden");
+                container.innerHTML = items.map(t => {
+                    const isChecked = selectedFeedbackModuleIds.has(t.id);
+                    const isMatchedDirection = t.direction.includes(currentDirection);
+                    const opacityClass = isMatchedDirection ? "opacity-100 font-medium" : "opacity-60";
+                    return `
+                        <label class="flex items-start space-x-2 text-xs bg-white p-2 rounded border border-slate-200 cursor-pointer hover:bg-blue-50 transition-colors ${opacityClass}">
+                            <input type="checkbox" name="feedback-module" value="${t.id}" ${isChecked ? "checked" : ""} class="mt-0.5 text-blue-600 focus:ring-blue-500 rounded" onchange="handleModuleCheckboxChange('${t.id}', this.checked)">
+                            <span class="text-slate-700"><span class="font-bold text-blue-600">[${t.id}]</span> ${t.text}</span>
+                        </label>
+                    `;
+                }).join('');
             }
         }
 
-        // --- 4. Tab 切換機制 ---
+        // 處理 Checkbox 勾選變更：更新 selectedFeedbackModuleIds 與 textarea 自動組合
+        function handleModuleCheckboxChange(id, isChecked) {
+            if (isChecked) {
+                selectedFeedbackModuleIds.add(id);
+            } else {
+                selectedFeedbackModuleIds.delete(id);
+            }
+
+            const textArea = document.getElementById("feedback-text");
+            const currentText = textArea.value;
+
+            // 產生依目前勾選模組計算出的標準組合文字
+            const generatedText = getGeneratedTextFromSelectedModules();
+
+            // 若目前 textarea 為空，或等於上次自動產生的文字，則直接更新
+            if (!currentText || currentText === lastGeneratedFeedbackText) {
+                textArea.value = generatedText;
+                lastGeneratedFeedbackText = generatedText;
+            } else {
+                // 老師已經修改過文字：若為勾選新增，則將該新模組文字附加在最後面
+                if (isChecked) {
+                    const addedModule = feedbackTemplates.find(t => t.id === id);
+                    if (addedModule) {
+                        textArea.value = currentText.trim() + "\n\n" + addedModule.text;
+                        lastGeneratedFeedbackText = generatedText;
+                    }
+                }
+                // 若為取消勾選，保留老師手動修改內容，不強制覆蓋
+            }
+        }
+
+        // 依固定順序排序產生回饋文字
+        function getGeneratedTextFromSelectedModules() {
+            const sortedTemplates = feedbackTemplates
+                .filter(t => selectedFeedbackModuleIds.has(t.id))
+                .sort((a, b) => a.id.localeCompare(b.id));
+
+            const uniqueTexts = [];
+            sortedTemplates.forEach(t => {
+                if (!uniqueTexts.includes(t.text)) {
+                    uniqueTexts.push(t.text);
+                }
+            });
+            return uniqueTexts.join("\n\n");
+        }
+
+        // 按鈕：依目前勾選模組重新產生
+        function regenerateFeedbackText() {
+            const generatedText = getGeneratedTextFromSelectedModules();
+            document.getElementById("feedback-text").value = generatedText;
+            lastGeneratedFeedbackText = generatedText;
+        }
+
+        // Tab 切換機制
         function initTabs() {
             const navBtns = document.querySelectorAll(".nav-btn");
             navBtns.forEach(btn => {
-                btn.addEventListener("click", (e) => {
+                btn.addEventListener("click", () => {
                     const targetTab = btn.getAttribute("data-target");
                     
                     document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
@@ -817,7 +775,7 @@
             });
         }
 
-        // --- 5. 儲存與記錄處理 ---
+        // 表單提交處理
         function handleFormSubmit(e) {
             e.preventDefault();
 
@@ -832,10 +790,8 @@
             const feedbackText = document.getElementById("feedback-text").value;
             const eventMode = document.querySelector("input[name='event-mode']:checked").value;
 
-            if (!feedbackType) {
-                alert("請選擇回饋面向（做得好 / 待加強 / 下一步）！");
-                return;
-            }
+            // 依 A → B → C → D 順序保存 feedback_module_ids
+            const sortedModuleIds = Array.from(selectedFeedbackModuleIds).sort((a, b) => a.localeCompare(b));
 
             if (!clinicalSituation) {
                 alert("請選擇或輸入臨床情境！");
@@ -853,7 +809,7 @@
             if (eventMode === "existing") {
                 const existingSelectVal = document.getElementById("existing-event-select").value;
                 if (!existingSelectVal) {
-                    alert("請選擇要加入的既有評核事件，或切換為「建立新的評核事件」！");
+                    alert("請選擇要加入的既有評核事件！");
                     return;
                 }
                 assessmentId = existingSelectVal;
@@ -893,6 +849,7 @@
                 mentor_uid: currentUser.uid,
                 feedback_type: feedbackType,
                 feedback_text: feedbackText,
+                feedback_module_ids: sortedModuleIds,
                 ep_portfolio_status: 'pending',
                 created_by: currentUser.uid,
                 created_at: new Date().toISOString()
@@ -903,21 +860,18 @@
 
             showQuickCopyCard(newRecord);
 
+            // 重置表單狀態與記憶體變數
             document.getElementById("clinical-situation-select").value = "";
             document.getElementById("clinical-situation-other").value = "";
             document.getElementById("clinical-situation-other").classList.add("hidden");
             document.getElementById("feedback-text").value = "";
-            document.getElementById("selected-feedback-type").value = "";
+            
+            selectedFeedbackModuleIds.clear();
+            lastGeneratedFeedbackText = "";
+            renderStep9Checkboxes();
+
             document.querySelector("input[name='event-mode'][value='new']").checked = true;
             document.getElementById("existing-event-container").classList.add("hidden");
-            
-            const noticeEl = document.getElementById("template-notice");
-            if (noticeEl) noticeEl.classList.add("hidden");
-
-            document.querySelectorAll(".feedback-type-btn").forEach(b => {
-                b.classList.remove("bg-blue-600", "text-white", "border-blue-600");
-                b.classList.add("bg-white", "text-slate-700");
-            });
 
             renderRecords();
             renderEPortfolioList();
@@ -996,7 +950,7 @@ ${record.feedback_text}`;
             }
         }
 
-        // --- 6. 渲染回饋紀錄列表 ---
+        // 渲染回饋紀錄列表
         function renderRecords() {
             const records = getStoredRecords();
             const listContainer = document.getElementById("records-list");
@@ -1034,7 +988,7 @@ ${record.feedback_text}`;
                     <div class="text-[11px] text-blue-700 font-mono">
                         情境：${r.clinical_situation} | Assessment ID: ${r.assessment_id}
                     </div>
-                    <div class="text-slate-600 bg-white p-2 rounded border border-slate-200">
+                    <div class="text-slate-600 bg-white p-2 rounded border border-slate-200 whitespace-pre-line">
                         <span class="font-semibold text-blue-600">[${r.feedback_type}]</span> ${r.feedback_text}
                     </div>
                     <div class="flex justify-end pt-1">
@@ -1062,7 +1016,7 @@ ${r.feedback_text}`;
             copyToClipboard(formatText, r.feedback_id);
         }
 
-        // --- 7. E-Portfolio 專區渲染 ---
+        // E-Portfolio 專區渲染
         function renderEPortfolioList(mode = 'pending') {
             const records = getStoredRecords();
             const listContainer = document.getElementById("ep-list");
@@ -1103,32 +1057,26 @@ ${r.feedback_text}`;
             `).join('');
         }
 
-        // --- 8. 罐頭管理渲染與持久化 ---
+        // 罐頭管理渲染 (32 個模組)
         function renderTemplates() {
-            const category = document.getElementById("template-filter-category").value;
+            const domainFilter = document.getElementById("template-filter-domain").value;
             const container = document.getElementById("templates-list");
 
-            const filtered = feedbackTemplates.filter(t => t.assessment_type === category);
-
-            if (filtered.length === 0) {
-                container.innerHTML = `<div class="text-center py-6 text-xs text-slate-400 bg-slate-50 rounded-lg border border-dashed border-slate-200">此分類尚無罐頭範本</div>`;
-                return;
-            }
+            const filtered = feedbackTemplates.filter(t => t.domain === domainFilter);
 
             container.innerHTML = filtered.map(t => `
                 <div class="bg-slate-50 border border-slate-200 p-3 rounded-lg text-xs space-y-2">
                     <div class="flex justify-between items-center">
-                        <span class="font-bold text-slate-700">${t.assessment_item} (${t.feedback_type})</span>
-                        <button onclick="toggleTemplateStatus('${t.template_id}')" class="px-2 py-0.5 rounded text-[10px] font-medium ${t.active ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'}">
+                        <span class="font-bold text-blue-700">[${t.id}] 適用方向: ${t.direction.join(", ")}</span>
+                        <button onclick="toggleTemplateStatus('${t.id}')" class="px-2 py-0.5 rounded text-[10px] font-medium ${t.active ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'}">
                             ${t.active ? '使用中' : '已停用'}
                         </button>
                     </div>
-                    <div class="text-slate-500 font-mono text-[11px]">情境：${t.clinical_situation}</div>
                     <div class="bg-white p-2 rounded border border-slate-200 text-slate-700">
-                        <textarea id="tpl-text-${t.template_id}" rows="2" class="w-full bg-transparent focus:outline-none resize-y">${t.template_text}</textarea>
+                        <textarea id="tpl-text-${t.id}" rows="2" class="w-full bg-transparent focus:outline-none resize-y">${t.text}</textarea>
                     </div>
                     <div class="flex justify-end">
-                        <button onclick="updateTemplateText('${t.template_id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-[11px] font-medium">
+                        <button onclick="updateTemplateText('${t.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-[11px] font-medium">
                             儲存修改
                         </button>
                     </div>
@@ -1138,32 +1086,26 @@ ${r.feedback_text}`;
 
         function toggleTemplateStatus(id) {
             feedbackTemplates = feedbackTemplates.map(t => {
-                if (t.template_id === id) {
-                    t.active = !t.active;
-                    t.updated_by = currentUser.uid;
-                    t.updated_at = new Date().toISOString();
-                }
+                if (t.id === id) t.active = !t.active;
                 return t;
             });
             saveTemplates(feedbackTemplates);
             renderTemplates();
+            renderStep9Checkboxes();
         }
 
         function updateTemplateText(id) {
-            const newNameInput = document.getElementById(`tpl-text-${id}`);
-            if (!newNameInput) return;
-            const newText = newNameInput.value;
+            const input = document.getElementById(`tpl-text-${id}`);
+            if (!input) return;
+            const newText = input.value;
             feedbackTemplates = feedbackTemplates.map(t => {
-                if (t.template_id === id) {
-                    t.template_text = newText;
-                    t.updated_by = currentUser.uid;
-                    t.updated_at = new Date().toISOString();
-                }
+                if (t.id === id) t.text = newText;
                 return t;
             });
             saveTemplates(feedbackTemplates);
-            alert("罐頭文字已更新並儲存於此裝置！");
+            alert("模組內容已更新並儲存！");
             renderTemplates();
+            renderStep9Checkboxes();
         }
     </script>
 </body>
