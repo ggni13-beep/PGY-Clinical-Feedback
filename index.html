@@ -29,7 +29,7 @@
                 <p class="text-xs text-blue-100">Clinical Feedback · CBD · Mini-CEX · EPA · SIRIPPP</p>
             </div>
             <div class="text-xs bg-blue-700 px-2.5 py-1 rounded-full border border-blue-500 font-medium">
-                RT 專用版 V2.6.1
+                RT 專用版 V2.7.1
             </div>
         </div>
     </header>
@@ -51,7 +51,7 @@
                 </h2>
 
                 <form id="feedback-form" class="space-y-3">
-                    <!-- Step 1: 選 PGY -->
+                    <!-- Step 1: 選 PGY (動態讀取主檔) -->
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Step 1: 選擇 PGY 學員</label>
                         <select id="pgy-select" required class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
@@ -120,7 +120,7 @@
                         </div>
                     </div>
 
-                    <!-- Step 6 & 7: 導師與日期 -->
+                    <!-- Step 6 & 7: 導師與日期 (Step 6 改為動態讀取導師主檔) -->
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1">Step 6: 臨床導師</label>
@@ -267,8 +267,54 @@
             </div>
         </section>
 
-        <!-- Tab 4: 罐頭管理 -->
+        <!-- Tab 4: 罐頭與人員主檔管理 -->
         <section id="tab-templates" class="tab-content space-y-4">
+            <!-- 人員主檔管理區塊 -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-4">
+                <h2 class="text-base font-bold text-slate-700 mb-1">👥 人員主檔管理</h2>
+                <p class="text-xs text-slate-500 mb-3">管理 PGY 學員與臨床導師主檔資料。</p>
+
+                <div class="flex space-x-2 mb-3">
+                    <button type="button" id="master-tab-pgy" onclick="switchMasterTab('pgy')" class="flex-1 py-1.5 text-xs font-medium bg-blue-600 text-white rounded-lg shadow-sm">PGY 學員主檔</button>
+                    <button type="button" id="master-tab-mentor" onclick="switchMasterTab('mentor')" class="flex-1 py-1.5 text-xs font-medium bg-slate-200 text-slate-700 rounded-lg">臨床導師主檔</button>
+                </div>
+
+                <!-- PGY 管理子區塊 -->
+                <div id="master-pgy-section" class="space-y-3">
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
+                        <h3 class="text-xs font-bold text-slate-700">新增 / 編輯 PGY 學員</h3>
+                        <input type="hidden" id="edit-pgy-original-id" value="">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="pgy-input-id" placeholder="員工編號 (例: 131000)" class="w-full p-2 bg-white border border-slate-300 rounded text-xs">
+                            <input type="text" id="pgy-input-name" placeholder="學員姓名 (例: 王○○)" class="w-full p-2 bg-white border border-slate-300 rounded text-xs">
+                        </div>
+                        <div class="flex justify-end space-x-2">
+                            <button type="button" onclick="resetPgyForm()" class="px-3 py-1 bg-slate-200 text-slate-700 text-xs rounded">取消</button>
+                            <button type="button" onclick="savePgyStudent()" class="px-3 py-1 bg-blue-600 text-white text-xs rounded">儲存 PGY</button>
+                        </div>
+                    </div>
+                    <div id="pgy-master-list" class="space-y-2 mt-2"></div>
+                </div>
+
+                <!-- 導師管理子區塊 -->
+                <div id="master-mentor-section" class="space-y-3 hidden">
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
+                        <h3 class="text-xs font-bold text-slate-700">新增 / 編輯臨床導師</h3>
+                        <input type="hidden" id="edit-mentor-original-code" value="">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="mentor-input-code" placeholder="導師代碼 (例: WANG01)" class="w-full p-2 bg-white border border-slate-300 rounded text-xs">
+                            <input type="text" id="mentor-input-name" placeholder="導師姓名 (例: 王老師)" class="w-full p-2 bg-white border border-slate-300 rounded text-xs">
+                        </div>
+                        <div class="flex justify-end space-x-2">
+                            <button type="button" onclick="resetMentorForm()" class="px-3 py-1 bg-slate-200 text-slate-700 text-xs rounded">取消</button>
+                            <button type="button" onclick="saveClinicalMentor()" class="px-3 py-1 bg-blue-600 text-white text-xs rounded">儲存導師</button>
+                        </div>
+                    </div>
+                    <div id="mentor-master-list" class="space-y-2 mt-2"></div>
+                </div>
+            </div>
+
+            <!-- 罐頭文字管理區塊 -->
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <h2 class="text-base font-bold text-slate-700 mb-1">模組化回饋管理</h2>
                 <p class="text-xs text-slate-500 mb-3">檢視與維護 32 個核心回饋模組（修改後自動儲存於此裝置）。</p>
@@ -316,11 +362,10 @@
     <!-- JavaScript 邏輯 -->
     <script>
         // ==========================================
-        // RT 專用版 V2.6.1 Modular Feedback
-        // 四大面向複選式質性回饋系統 (修正互動邏輯版)
+        // RT 專用版 V2.7.1 核心主檔升級版
         // ==========================================
 
-        const TEMPLATE_SCHEMA_VERSION = "2.6.1";
+        const TEMPLATE_SCHEMA_VERSION = "2.7.1";
 
         // 集中管理目前登入使用者的身分物件 (Firebase-ready)
         const currentUser = {
@@ -330,23 +375,22 @@
             authenticated: false
         };
 
-        // PGY 學員資料
-        const pgyList = [
-            { id: "RT001", name: "林○○" },
-            { id: "RT002", name: "李○○" },
-            { id: "RT003", name: "陳○○" },
-            { id: "RT004", name: "謝○○" },
-            { id: "RT005", name: "葉○○" },
-            { id: "RT006", name: "葉○○" }
+        // 預設 6 位 PGY 學員資料
+        const defaultPgyStudents = [
+            { employee_id: "128368", name: "林○○", status: "active", created_at: new Date().toISOString() },
+            { employee_id: "128493", name: "李○○", status: "active", created_at: new Date().toISOString() },
+            { employee_id: "130020", name: "陳○○", status: "active", created_at: new Date().toISOString() },
+            { employee_id: "130088", name: "謝○○", status: "active", created_at: new Date().toISOString() },
+            { employee_id: "130323", name: "葉○○", status: "active", created_at: new Date().toISOString() },
+            { employee_id: "130917", name: "葉○○", status: "active", created_at: new Date().toISOString() }
         ];
 
-        // 臨床導師資料
-        const mentorsList = [
-            "王老師",
-            "林老師",
-            "陳老師",
-            "張老師",
-            "其他導師"
+        // 預設臨床導師資料
+        const defaultMentors = [
+            { mentor_code: "WANG01", mentor_name: "王老師", status: "active", created_at: new Date().toISOString() },
+            { mentor_code: "LIN01", mentor_name: "林老師", status: "active", created_at: new Date().toISOString() },
+            { mentor_code: "CHEN01", mentor_name: "陳老師", status: "active", created_at: new Date().toISOString() },
+            { mentor_code: "ZHANG01", mentor_name: "張老師", status: "active", created_at: new Date().toISOString() }
         ];
 
         // 評核項目對應
@@ -402,11 +446,76 @@
             ];
         }
 
-        // V2.6.1 模組化選取狀態保存變數
+        // --- 主檔集中管理函數 (Rule 24) ---
+        function getStoredPGYStudents() {
+            try {
+                let data = localStorage.getItem("pgy_students");
+                if (!data) {
+                    // Migration: 若無則建立預設 6 位
+                    savePGYStudents(defaultPgyStudents);
+                    return defaultPgyStudents;
+                }
+                return JSON.parse(data);
+            } catch (e) {
+                console.error("pgy_students error:", e);
+                return defaultPgyStudents;
+            }
+        }
+
+        function savePGYStudents(list) {
+            try {
+                localStorage.setItem("pgy_students", JSON.stringify(list));
+            } catch (e) {
+                alert("儲存 PGY 主檔失敗。");
+            }
+        }
+
+        function getActivePGYStudents() {
+            return getStoredPGYStudents().filter(p => p.status === "active");
+        }
+
+        function getStoredMentors() {
+            try {
+                let data = localStorage.getItem("pgy_clinical_mentors");
+                if (!data) {
+                    saveMentors(defaultMentors);
+                    return defaultMentors;
+                }
+                return JSON.parse(data);
+            } catch (e) {
+                console.error("pgy_clinical_mentors error:", e);
+                return defaultMentors;
+            }
+        }
+
+        function saveMentors(list) {
+            try {
+                localStorage.setItem("pgy_clinical_mentors", JSON.stringify(list));
+            } catch (e) {
+                alert("儲存導師主檔失敗。");
+            }
+        }
+
+        function getActiveMentors() {
+            return getStoredMentors().filter(m => m.status === "active");
+        }
+
+        // 導師顯示名稱相容性處理 (Rule 12)
+        function getMentorDisplayName(record) {
+            if (record.mentor_code && record.mentor_name) {
+                return `${record.mentor_code}｜${record.mentor_name}`;
+            }
+            if (record.mentor_name) {
+                return record.mentor_name;
+            }
+            return record.mentor || "未知導師";
+        }
+
+        // 模組化選取狀態保存變數
         let selectedFeedbackModuleIds = new Set();
         let lastGeneratedFeedbackText = "";
 
-        // LocalStorage 管理與 Migration 機制 (V2.6.1)
+        // LocalStorage 管理與 Template Migration
         function getStoredTemplates() {
             try {
                 const storedVersion = localStorage.getItem("pgy_feedback_templates_version");
@@ -511,6 +620,7 @@
             renderRecords();
             renderEPortfolioList();
             renderTemplates();
+            renderMasterLists();
 
             document.getElementById("assessment-type").addEventListener("change", () => {
                 updateAssessmentItems();
@@ -554,7 +664,7 @@
                 });
             });
 
-            // Step 8 按鈕切換 (切換方向不清除已選模組)
+            // Step 8 按鈕切換
             const feedbackBtns = document.querySelectorAll(".feedback-type-btn");
             feedbackBtns.forEach(btn => {
                 btn.addEventListener("click", (e) => {
@@ -592,20 +702,35 @@
             document.getElementById("template-filter-domain").addEventListener("change", renderTemplates);
         });
 
-        // 初始化表單選項
+        // 初始化表單選項 (動態讀取 PGY 主檔與導師主檔)
         function initFormSelects() {
             const pgySelect = document.getElementById("pgy-select");
             const filterPgy = document.getElementById("filter-pgy");
-            pgyList.forEach(p => {
-                pgySelect.innerHTML += `<option value="${p.id}">${p.id} ${p.name}</option>`;
-                filterPgy.innerHTML += `<option value="${p.id}">${p.id} ${p.name}</option>`;
+            
+            pgySelect.innerHTML = '<option value="">-- 請選擇 PGY 學員 --</option>';
+            filterPgy.innerHTML = '<option value="">全部學員</option>';
+            
+            // 下拉選單只顯示 active PGY (Rule 8)
+            getActivePGYStudents().forEach(p => {
+                pgySelect.innerHTML += `<option value="${p.employee_id}">${p.employee_id} ${p.name}</option>`;
+            });
+            // 歷史篩選可以包含所有 PGY (包含 inactive)
+            getStoredPGYStudents().forEach(p => {
+                filterPgy.innerHTML += `<option value="${p.employee_id}">${p.employee_id} ${p.name} ${p.status === 'inactive' ? '(已停用)' : ''}</option>`;
             });
 
             const mentorSelect = document.getElementById("mentor-select");
             const filterMentor = document.getElementById("filter-mentor");
-            mentorsList.forEach(m => {
-                mentorSelect.innerHTML += `<option value="${m}">${m}</option>`;
-                filterMentor.innerHTML += `<option value="${m}">${m}</option>`;
+            
+            mentorSelect.innerHTML = '<option value="">-- 導師 --</option>';
+            filterMentor.innerHTML = '<option value="">全部導師</option>';
+            
+            // Step 6 只顯示 active 導師 (Rule 9)
+            getActiveMentors().forEach(m => {
+                mentorSelect.innerHTML += `<option value="${m.mentor_code}">${m.mentor_code}｜${m.mentor_name}</option>`;
+            });
+            getStoredMentors().forEach(m => {
+                filterMentor.innerHTML += `<option value="${m.mentor_code}">${m.mentor_code}｜${m.mentor_name} ${m.status === 'inactive' ? '(已停用)' : ''}</option>`;
             });
         }
 
@@ -671,7 +796,7 @@
             });
         }
 
-        // 渲染 Step 9 四大面向 Checkbox 列表 (依 selectedFeedbackModuleIds 恢復 checked 狀態)
+        // 渲染 Step 9 四大面向 Checkbox 列表
         function renderStep9Checkboxes() {
             const currentDirection = document.getElementById("selected-feedback-type").value;
             
@@ -700,7 +825,6 @@
             }
         }
 
-        // 處理 Checkbox 勾選變更：更新 selectedFeedbackModuleIds 與 textarea 自動組合
         function handleModuleCheckboxChange(id, isChecked) {
             if (isChecked) {
                 selectedFeedbackModuleIds.add(id);
@@ -710,16 +834,12 @@
 
             const textArea = document.getElementById("feedback-text");
             const currentText = textArea.value;
-
-            // 產生依目前勾選模組計算出的標準組合文字
             const generatedText = getGeneratedTextFromSelectedModules();
 
-            // 若目前 textarea 為空，或等於上次自動產生的文字，則直接更新
             if (!currentText || currentText === lastGeneratedFeedbackText) {
                 textArea.value = generatedText;
                 lastGeneratedFeedbackText = generatedText;
             } else {
-                // 老師已經修改過文字：若為勾選新增，則將該新模組文字附加在最後面
                 if (isChecked) {
                     const addedModule = feedbackTemplates.find(t => t.id === id);
                     if (addedModule) {
@@ -727,11 +847,9 @@
                         lastGeneratedFeedbackText = generatedText;
                     }
                 }
-                // 若為取消勾選，保留老師手動修改內容，不強制覆蓋
             }
         }
 
-        // 依固定順序排序產生回饋文字
         function getGeneratedTextFromSelectedModules() {
             const sortedTemplates = feedbackTemplates
                 .filter(t => selectedFeedbackModuleIds.has(t.id))
@@ -746,11 +864,200 @@
             return uniqueTexts.join("\n\n");
         }
 
-        // 按鈕：依目前勾選模組重新產生
         function regenerateFeedbackText() {
             const generatedText = getGeneratedTextFromSelectedModules();
             document.getElementById("feedback-text").value = generatedText;
             lastGeneratedFeedbackText = generatedText;
+        }
+
+        // --- 人員主檔管理介面與邏輯 (Rule 4, 7) ---
+        function switchMasterTab(type) {
+            const pgyBtn = document.getElementById("master-tab-pgy");
+            const mentorBtn = document.getElementById("master-tab-mentor");
+            const pgySec = document.getElementById("master-pgy-section");
+            const mentorSec = document.getElementById("master-mentor-section");
+
+            if (type === 'pgy') {
+                pgyBtn.className = "flex-1 py-1.5 text-xs font-medium bg-blue-600 text-white rounded-lg shadow-sm";
+                mentorBtn.className = "flex-1 py-1.5 text-xs font-medium bg-slate-200 text-slate-700 rounded-lg";
+                pgySec.classList.remove("hidden");
+                mentorSec.classList.add("hidden");
+            } else {
+                mentorBtn.className = "flex-1 py-1.5 text-xs font-medium bg-blue-600 text-white rounded-lg shadow-sm";
+                pgyBtn.className = "flex-1 py-1.5 text-xs font-medium bg-slate-200 text-slate-700 rounded-lg";
+                mentorSec.classList.remove("hidden");
+                pgySec.classList.add("hidden");
+            }
+        }
+
+        function renderMasterLists() {
+            // Render PGY list
+            const pgyListContainer = document.getElementById("pgy-master-list");
+            const pgyStudents = getStoredPGYStudents();
+            pgyListContainer.innerHTML = pgyStudents.map(p => `
+                <div class="bg-slate-50 border border-slate-200 p-2.5 rounded flex justify-between items-center text-xs">
+                    <div>
+                        <span class="font-bold text-slate-700">${p.employee_id}</span> - <span>${p.name}</span>
+                        <span class="ml-2 px-1.5 py-0.5 rounded text-[10px] ${p.status === 'active' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'}">${p.status}</span>
+                    </div>
+                    <div class="space-x-1">
+                        <button onclick="editPgyStudent('${p.employee_id}')" class="px-2 py-1 bg-blue-50 text-blue-600 rounded border border-blue-200 text-[11px]">編輯</button>
+                        <button onclick="togglePgyStatus('${p.employee_id}')" class="px-2 py-1 bg-slate-200 text-slate-700 rounded text-[11px]">${p.status === 'active' ? '停用' : '啟用'}</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Render Mentor list
+            const mentorListContainer = document.getElementById("mentor-master-list");
+            const mentors = getStoredMentors();
+            mentorListContainer.innerHTML = mentors.map(m => `
+                <div class="bg-slate-50 border border-slate-200 p-2.5 rounded flex justify-between items-center text-xs">
+                    <div>
+                        <span class="font-bold text-slate-700">${m.mentor_code}</span>｜<span>${m.mentor_name}</span>
+                        <span class="ml-2 px-1.5 py-0.5 rounded text-[10px] ${m.status === 'active' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'}">${m.status}</span>
+                    </div>
+                    <div class="space-x-1">
+                        <button onclick="editClinicalMentor('${m.mentor_code}')" class="px-2 py-1 bg-blue-50 text-blue-600 rounded border border-blue-200 text-[11px]">編輯</button>
+                        <button onclick="toggleMentorStatus('${m.mentor_code}')" class="px-2 py-1 bg-slate-200 text-slate-700 rounded text-[11px]">${m.status === 'active' ? '停用' : '啟用'}</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function savePgyStudent() {
+            const idInput = document.getElementById("pgy-input-id").value.trim();
+            const nameInput = document.getElementById("pgy-input-name").value.trim();
+            const originalId = document.getElementById("edit-pgy-original-id").value;
+
+            if (!idInput || !nameInput) {
+                alert("請完整輸入員工編號與姓名！");
+                return;
+            }
+
+            let list = getStoredPGYStudents();
+            if (originalId) {
+                // 編輯模式
+                list = list.map(p => {
+                    if (p.employee_id === originalId) {
+                        p.employee_id = idInput;
+                        p.name = nameInput;
+                    }
+                    return p;
+                });
+            } else {
+                // 新增模式
+                if (list.some(p => p.employee_id === idInput)) {
+                    alert("此員工編號已存在！");
+                    return;
+                }
+                list.push({
+                    employee_id: idInput,
+                    name: nameInput,
+                    status: "active",
+                    created_at: new Date().toISOString()
+                });
+            }
+
+            savePGYStudents(list);
+            resetPgyForm();
+            initFormSelects();
+            renderMasterLists();
+            alert("PGY 學員主檔儲存成功！");
+        }
+
+        function editPgyStudent(id) {
+            const list = getStoredPGYStudents();
+            const p = list.find(item => item.employee_id === id);
+            if (!p) return;
+            document.getElementById("pgy-input-id").value = p.employee_id;
+            document.getElementById("pgy-input-name").value = p.name;
+            document.getElementById("edit-pgy-original-id").value = p.employee_id;
+        }
+
+        function resetPgyForm() {
+            document.getElementById("pgy-input-id").value = "";
+            document.getElementById("pgy-input-name").value = "";
+            document.getElementById("edit-pgy-original-id").value = "";
+        }
+
+        function togglePgyStatus(id) {
+            let list = getStoredPGYStudents();
+            list = list.map(p => {
+                if (p.employee_id === id) {
+                    p.status = p.status === "active" ? "inactive" : "active";
+                }
+                return p;
+            });
+            savePGYStudents(list);
+            initFormSelects();
+            renderMasterLists();
+        }
+
+        function saveClinicalMentor() {
+            const codeInput = document.getElementById("mentor-input-code").value.trim();
+            const nameInput = document.getElementById("mentor-input-name").value.trim();
+            const originalCode = document.getElementById("edit-mentor-original-code").value;
+
+            if (!codeInput || !nameInput) {
+                alert("請完整輸入導師代碼與姓名！");
+                return;
+            }
+
+            let list = getStoredMentors();
+            if (originalCode) {
+                list = list.map(m => {
+                    if (m.mentor_code === originalCode) {
+                        m.mentor_code = codeInput;
+                        m.mentor_name = nameInput;
+                    }
+                    return m;
+                });
+            } else {
+                if (list.some(m => m.mentor_code === codeInput)) {
+                    alert("此導師代碼已存在！");
+                    return;
+                }
+                list.push({
+                    mentor_code: codeInput,
+                    mentor_name: nameInput,
+                    status: "active",
+                    created_at: new Date().toISOString()
+                });
+            }
+
+            saveMentors(list);
+            resetMentorForm();
+            initFormSelects();
+            renderMasterLists();
+            alert("臨床導師主檔儲存成功！");
+        }
+
+        function editClinicalMentor(code) {
+            const list = getStoredMentors();
+            const m = list.find(item => item.mentor_code === code);
+            if (!m) return;
+            document.getElementById("mentor-input-code").value = m.mentor_code;
+            document.getElementById("mentor-input-name").value = m.mentor_name;
+            document.getElementById("edit-mentor-original-code").value = m.mentor_code;
+        }
+
+        function resetMentorForm() {
+            document.getElementById("mentor-input-code").value = "";
+            document.getElementById("mentor-input-name").value = "";
+            document.getElementById("edit-mentor-original-code").value = "";
+        }
+
+        function toggleMentorStatus(code) {
+            let list = getStoredMentors();
+            list = list.map(m => {
+                if (m.mentor_code === code) {
+                    m.status = m.status === "active" ? "inactive" : "active";
+                }
+                return m;
+            });
+            saveMentors(list);
+            initFormSelects();
+            renderMasterLists();
         }
 
         // Tab 切換機制
@@ -780,17 +1087,17 @@
             e.preventDefault();
 
             const pgyId = document.getElementById("pgy-select").value;
-            const pgyObj = pgyList.find(p => p.id === pgyId);
+            const pgyObj = getStoredPGYStudents().find(p => p.employee_id === pgyId);
             const assessmentType = document.getElementById("assessment-type").value;
             const assessmentItem = document.getElementById("assessment-item").value;
             const clinicalSituation = getSelectedClinicalSituation();
-            const mentor = document.getElementById("mentor-select").value;
+            const mentorCode = document.getElementById("mentor-select").value;
+            const mentorObj = getStoredMentors().find(m => m.mentor_code === mentorCode);
             const date = document.getElementById("feedback-date").value;
             const feedbackType = document.getElementById("selected-feedback-type").value;
             const feedbackText = document.getElementById("feedback-text").value;
             const eventMode = document.querySelector("input[name='event-mode']:checked").value;
 
-            // 依 A → B → C → D 順序保存 feedback_module_ids
             const sortedModuleIds = Array.from(selectedFeedbackModuleIds).sort((a, b) => a.localeCompare(b));
 
             if (!clinicalSituation) {
@@ -836,16 +1143,20 @@
                 saveAssessmentEvents(assessmentEvents);
             }
 
+            const mentorNameVal = mentorObj ? mentorObj.mentor_name : mentorCode;
+
             const newRecord = {
                 assessment_id: assessmentId,
                 feedback_id: 'FB_' + Date.now() + '_' + Math.floor(Math.random()*1000),
                 pgy_id: pgyId,
                 pgy_name: pgyObj ? pgyObj.name : '',
+                mentor_code: mentorCode,
+                mentor_name: mentorNameVal,
+                mentor: mentorNameVal, // 相容舊欄位
                 assessment_type: assessmentType,
                 assessment_item: assessmentItem,
                 clinical_situation: clinicalSituation,
                 date: date,
-                mentor: mentor,
                 mentor_uid: currentUser.uid,
                 feedback_type: feedbackType,
                 feedback_text: feedbackText,
@@ -882,10 +1193,11 @@
             const card = document.getElementById("quick-copy-card");
             card.classList.remove("hidden");
             
+            const mentorDisplay = getMentorDisplayName(record);
             const formatText = `評核項目：${record.assessment_item}
 臨床情境：${record.clinical_situation}
 評核日期：${record.date}
-臨床導師：${record.mentor}
+臨床導師：${mentorDisplay}
 
 質性回饋：
 ${record.feedback_text}`;
@@ -950,7 +1262,7 @@ ${record.feedback_text}`;
             }
         }
 
-        // 渲染回饋紀錄列表
+        // 渲染回饋紀錄列表 (支援新舊 PGY 及導師相容性篩選)
         function renderRecords() {
             const records = getStoredRecords();
             const listContainer = document.getElementById("records-list");
@@ -963,7 +1275,11 @@ ${record.feedback_text}`;
             const filtered = records.filter(r => {
                 if (filterPgy && r.pgy_id !== filterPgy) return false;
                 if (filterType && r.assessment_type !== filterType) return false;
-                if (filterMentor && r.mentor !== filterMentor) return false;
+                if (filterMentor) {
+                    const matchCode = r.mentor_code === filterMentor;
+                    const matchName = r.mentor === filterMentor || r.mentor_name === filterMentor;
+                    if (!matchCode && !matchName) return false;
+                }
                 if (filterStatus && r.ep_portfolio_status !== filterStatus) return false;
                 return true;
             });
@@ -973,31 +1289,34 @@ ${record.feedback_text}`;
                 return;
             }
 
-            listContainer.innerHTML = filtered.map(r => `
-                <div class="bg-slate-50 border border-slate-200 p-3 rounded-lg text-xs space-y-1.5 shadow-xs">
-                    <div class="flex justify-between items-center font-bold text-slate-700">
-                        <span>${r.pgy_id} ${r.pgy_name} | ${r.assessment_item}</span>
-                        <span class="px-2 py-0.5 rounded text-[10px] ${r.ep_portfolio_status === 'copied' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
-                            ${r.ep_portfolio_status === 'copied' ? '已複製' : '尚未複製'}
-                        </span>
+            listContainer.innerHTML = filtered.map(r => {
+                const mentorDisplay = getMentorDisplayName(r);
+                return `
+                    <div class="bg-slate-50 border border-slate-200 p-3 rounded-lg text-xs space-y-1.5 shadow-xs">
+                        <div class="flex justify-between items-center font-bold text-slate-700">
+                            <span>${r.pgy_id} ${r.pgy_name} | ${r.assessment_item}</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] ${r.ep_portfolio_status === 'copied' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                                ${r.ep_portfolio_status === 'copied' ? '已複製' : '尚未複製'}
+                            </span>
+                        </div>
+                        <div class="text-slate-500 flex justify-between">
+                            <span>類型：${r.assessment_type} | 導師：${mentorDisplay}</span>
+                            <span>日期：${r.date}</span>
+                        </div>
+                        <div class="text-[11px] text-blue-700 font-mono">
+                            情境：${r.clinical_situation} | Assessment ID: ${r.assessment_id}
+                        </div>
+                        <div class="text-slate-600 bg-white p-2 rounded border border-slate-200 whitespace-pre-line">
+                            <span class="font-semibold text-blue-600">[${r.feedback_type}]</span> ${r.feedback_text}
+                        </div>
+                        <div class="flex justify-end pt-1">
+                            <button onclick="copySingleRecord('${r.feedback_id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded text-[11px] font-medium transition-colors">
+                                複製 E-Portfolio
+                            </button>
+                        </div>
                     </div>
-                    <div class="text-slate-500 flex justify-between">
-                        <span>類型：${r.assessment_type} | 導師：${r.mentor}</span>
-                        <span>日期：${r.date}</span>
-                    </div>
-                    <div class="text-[11px] text-blue-700 font-mono">
-                        情境：${r.clinical_situation} | Assessment ID: ${r.assessment_id}
-                    </div>
-                    <div class="text-slate-600 bg-white p-2 rounded border border-slate-200 whitespace-pre-line">
-                        <span class="font-semibold text-blue-600">[${r.feedback_type}]</span> ${r.feedback_text}
-                    </div>
-                    <div class="flex justify-end pt-1">
-                        <button onclick="copySingleRecord('${r.feedback_id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded text-[11px] font-medium transition-colors">
-                            複製 E-Portfolio
-                        </button>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function copySingleRecord(feedbackId) {
@@ -1005,10 +1324,11 @@ ${record.feedback_text}`;
             const r = records.find(item => item.feedback_id === feedbackId);
             if (!r) return;
 
+            const mentorDisplay = getMentorDisplayName(r);
             const formatText = `評核項目：${r.assessment_item}
 臨床情境：${r.clinical_situation}
 評核日期：${r.date}
-臨床導師：${r.mentor}
+臨床導師：${mentorDisplay}
 
 質性回饋：
 ${r.feedback_text}`;
@@ -1031,30 +1351,33 @@ ${r.feedback_text}`;
                 return;
             }
 
-            listContainer.innerHTML = filtered.map(r => `
-                <div class="bg-slate-50 border border-slate-200 p-3 rounded-lg text-xs space-y-1.5 shadow-xs">
-                    <div class="flex justify-between items-center font-bold text-slate-700">
-                        <span>${r.pgy_id} ${r.pgy_name} - ${r.assessment_item}</span>
-                        <span class="text-slate-400 text-[11px]">${r.date}</span>
+            listContainer.innerHTML = filtered.map(r => {
+                const mentorDisplay = getMentorDisplayName(r);
+                return `
+                    <div class="bg-slate-50 border border-slate-200 p-3 rounded-lg text-xs space-y-1.5 shadow-xs">
+                        <div class="flex justify-between items-center font-bold text-slate-700">
+                            <span>${r.pgy_id} ${r.pgy_name} - ${r.assessment_item}</span>
+                            <span class="text-slate-400 text-[11px]">${r.date}</span>
+                        </div>
+                        <div class="text-slate-500">導師：${mentorDisplay} | 面向：${r.feedback_type}</div>
+                        <div class="text-slate-700 bg-white p-2 rounded border border-slate-200 font-mono text-[11px]">
+                            評核項目：${r.assessment_item}<br>
+                            臨床情境：${r.clinical_situation}<br>
+                            評核日期：${r.date}<br>
+                            臨床導師：${mentorDisplay}<br><br>
+                            質性回饋：<br>${r.feedback_text}
+                        </div>
+                        <div class="flex justify-between items-center pt-1">
+                            <span class="text-[10px] ${r.ep_portfolio_status === 'copied' ? 'text-emerald-600 font-bold' : 'text-amber-600 font-bold'}">
+                               狀態：${r.ep_portfolio_status === 'copied' ? '已複製' : '尚未複製'}
+                            </span>
+                            <button onclick="copySingleRecord('${r.feedback_id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded text-xs font-medium transition-colors shadow-sm">
+                                📋 一鍵複製
+                            </button>
+                        </div>
                     </div>
-                    <div class="text-slate-500">導師：${r.mentor} | 面向：${r.feedback_type}</div>
-                    <div class="text-slate-700 bg-white p-2 rounded border border-slate-200 font-mono text-[11px]">
-                        評核項目：${r.assessment_item}<br>
-                        臨床情境：${r.clinical_situation}<br>
-                        評核日期：${r.date}<br>
-                        臨床導師：${r.mentor}<br><br>
-                        質性回饋：<br>${r.feedback_text}
-                    </div>
-                    <div class="flex justify-between items-center pt-1">
-                        <span class="text-[10px] ${r.ep_portfolio_status === 'copied' ? 'text-emerald-600 font-bold' : 'text-amber-600 font-bold'}">
-                            狀態：${r.ep_portfolio_status === 'copied' ? '已複製' : '尚未複製'}
-                        </span>
-                        <button onclick="copySingleRecord('${r.feedback_id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded text-xs font-medium transition-colors shadow-sm">
-                            📋 一鍵複製
-                        </button>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         // 罐頭管理渲染 (32 個模組)
