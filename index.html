@@ -94,7 +94,7 @@
                         <select id="clinical-situation-select" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none mb-2">
                             <option value="">-- 請選擇臨床情境（選填） --</option>
                         </select>
-                        <input type="text" id="clinical-situation-other" placeholder="請輸入其他自訂情境（若選其他則必填）" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none hidden">
+                        <input type="text" id="clinical-situation-other" placeholder="請說明其他臨床情境（選擇「其他」時必填）" aria-label="其他臨床情境說明" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none hidden">
                     </div>
 
                     <!-- Step 5: 評核事件 -->
@@ -131,22 +131,14 @@
                         </div>
                     </div>
 
-                    <!-- Step 8: 回饋面向按鈕 -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Step 8: 選擇回饋面向 (篩選模組)</label>
-                        <div class="grid grid-cols-3 gap-2">
-                            <button type="button" class="feedback-type-btn py-2 px-1 text-xs font-medium border border-slate-300 rounded-lg bg-white text-slate-700 hover:bg-blue-50 hover:border-blue-400 transition-all shadow-sm" data-type="做得好">做得好</button>
-                            <button type="button" class="feedback-type-btn py-2 px-1 text-xs font-medium border border-slate-300 rounded-lg bg-white text-slate-700 hover:bg-blue-50 hover:border-blue-400 transition-all shadow-sm" data-type="待加強">待加強</button>
-                            <button type="button" class="feedback-type-btn py-2 px-1 text-xs font-medium border border-slate-300 rounded-lg bg-white text-slate-700 hover:bg-blue-50 hover:border-blue-400 transition-all shadow-sm" data-type="下一步">下一步</button>
+                    <!-- Step 8: 四大面向分別選擇表現狀態；手機優先單欄呈現 -->
+                    <div class="space-y-2">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700">Step 8: 四大面向臨床表現</label>
+                            <p class="text-xs text-slate-500 mt-1">每個面向可獨立選擇「做得好」或「待加強」，可選擇一個或多個面向。</p>
                         </div>
-                        <input type="hidden" id="selected-feedback-type" value="做得好">
-                    </div>
-
-                    <!-- Step 9: 四大面向複選式回饋模組 -->
-                    <div class="space-y-2 border border-slate-200 p-3 rounded-lg bg-slate-50">
-                        <label class="block text-xs font-semibold text-slate-700">Step 9: 選擇回饋模組 (可複選)</label>
-                        <div id="modular-checkboxes-container" class="space-y-3 max-h-60 overflow-y-auto p-1">
-                            <!-- 動態生成四大分類 checkbox -->
+                        <div id="modular-checkboxes-container" class="space-y-3">
+                            <!-- 動態生成四大面向雙向選擇與對應回饋罐頭 -->
                         </div>
                     </div>
 
@@ -293,28 +285,30 @@
     <script>
         // --- Master 資料結構定義 ---
         const assessmentMaster = {
-            "CBD": ["CBD 1", "CBD 2", "CBD 3", "CBD 4", "CBD 5", "CBD 6", "CBD 7", "CBD 8", "CBD 9", "CBD 10"],
-            "Mini-CEX": ["Mini-CEX 1", "Mini-CEX 2", "Mini-CEX 3", "Mini-CEX 4", "Mini-CEX 5", "Mini-CEX 6", "Mini-CEX 7"],
+            "CBD": ["CbD1-m3", "CbD1-m6", "CbD1-m9", "CbD1-m12", "CbD1-m15", "CbD1-m18", "CbD1-m21", "CbD1-m24"],
+            "Mini-CEX": ["Mini CEX1-m3", "Mini CEX2-m6", "Mini CEX3-m9", "Mini CEX4-m12", "Mini CEX5-m15", "Mini CEX6-m18", "Mini CEX7-m21", "Mini CEX8-m24"],
             "EPA": ["EPA 1", "EPA 3", "EPA 5", "EPA 6", "EPA 7", "EPA 8", "EPA 9", "EPA 10", "EPA 11"],
             "SIRIPPP": ["SIRIPPP 1", "SIRIPPP 2", "SIRIPPP 3", "SIRIPPP 4", "SIRIPPP 5", "SIRIPPP 6", "SIRIPPP 7"]
         };
 
         const defaultPgyStudents = [
-            { employee_id: "128368", name: "林○○", status: "active", created_at: new Date().toISOString() },
-            { employee_id: "128493", name: "李○○", status: "active", created_at: new Date().toISOString() },
-            { employee_id: "130020", name: "陳○○", status: "active", created_at: new Date().toISOString() },
-            { employee_id: "130088", name: "謝○○", status: "active", created_at: new Date().toISOString() },
-            { employee_id: "130323", name: "葉○○", status: "active", created_at: new Date().toISOString() },
-            { employee_id: "130917", name: "葉○○", status: "active", created_at: new Date().toISOString() }
+            { employee_id: "130020", name: "陳O怡", status: "active", created_at: new Date().toISOString() },
+            { employee_id: "130088", name: "謝O元", status: "active", created_at: new Date().toISOString() },
+            { employee_id: "130323", name: "葉O程", status: "active", created_at: new Date().toISOString() },
+            { employee_id: "131750", name: "倪O晴", status: "active", created_at: new Date().toISOString() },
+            { employee_id: "131751", name: "方O茹", status: "active", created_at: new Date().toISOString() }
         ];
 
         const defaultMentors = [
-            { mentor_code: "F", mentor_name: "王老師", status: "active", created_at: new Date().toISOString() },
-            { mentor_code: "A", mentor_name: "林老師", status: "active", created_at: new Date().toISOString() },
-            { mentor_code: "C", mentor_name: "陳老師", status: "active", created_at: new Date().toISOString() },
-            { mentor_code: "B", mentor_name: "張老師", status: "active", created_at: new Date().toISOString() },
-            { mentor_code: "P", mentor_name: "黃老師", status: "active", created_at: new Date().toISOString() },
-            { mentor_code: "Y", mentor_name: "楊老師", status: "active", created_at: new Date().toISOString() }
+            { mentor_code: "A", mentor_name: "洪O婷", status: "active", created_at: new Date().toISOString() },
+            { mentor_code: "B", mentor_name: "辛O翰", status: "active", created_at: new Date().toISOString() },
+            { mentor_code: "F", mentor_name: "王O湞", status: "active", created_at: new Date().toISOString() },
+            { mentor_code: "P", mentor_name: "李O駿", status: "active", created_at: new Date().toISOString() },
+            { mentor_code: "V", mentor_name: "劉O婷", status: "active", created_at: new Date().toISOString() },
+            { mentor_code: "Y", mentor_name: "黃O萱", status: "active", created_at: new Date().toISOString() },
+            { mentor_code: "ㄌ", mentor_name: "呂O潔", status: "active", created_at: new Date().toISOString() },
+            { mentor_code: "ㄍ", mentor_name: "趙O君", status: "active", created_at: new Date().toISOString() },
+            { mentor_code: "ㄈ", mentor_name: "孫O梅", status: "active", created_at: new Date().toISOString() }
         ];
 
         const defaultSituations = [
@@ -376,6 +370,9 @@
         };
 
         let selectedFeedbackModuleIds = new Set();
+        const feedbackDomains = ["臨床評估與判斷", "臨床操作與病人照護", "溝通與團隊合作", "學習態度與專業成長"];
+        // 每個面向獨立保存狀態；未選擇的面向不會產生回饋內容。
+        let domainFeedbackStatus = {};
         let lastGeneratedFeedbackText = "";
         let feedbackTextManuallyEdited = false;
 
@@ -413,6 +410,36 @@
         function saveMentors(list) {
             localStorage.setItem("pgy_clinical_mentors", JSON.stringify(list));
         }
+
+        // 名單版本更新：只更新預設學員／導師名單，保留罐頭、評核、情境及既有回饋紀錄。
+        // 同時讓已開過舊版網站、已有 LocalStorage 的使用者也能看到新版預設名單。
+        (function migrateDefaultRosterV2() {
+            const migrationKey = "pgy_default_roster_v2_applied";
+            if (localStorage.getItem(migrationKey) === "yes") return;
+
+            const legacyStudentIds = new Set(["128368", "128493", "130020", "130088", "130323", "130917"]);
+            const legacyMentorCodes = new Set(["A", "B", "C", "F", "P", "Y"]);
+
+            try {
+                const storedStudents = localStorage.getItem("pgy_students");
+                if (storedStudents) {
+                    const current = JSON.parse(storedStudents);
+                    const customStudents = current.filter(item => !legacyStudentIds.has(String(item.employee_id)));
+                    savePgyStudents([...defaultPgyStudents, ...customStudents]);
+                }
+
+                const storedMentors = localStorage.getItem("pgy_clinical_mentors");
+                if (storedMentors) {
+                    const current = JSON.parse(storedMentors);
+                    const customMentors = current.filter(item => !legacyMentorCodes.has(String(item.mentor_code)));
+                    saveMentors([...defaultMentors, ...customMentors]);
+                }
+
+                localStorage.setItem(migrationKey, "yes");
+            } catch (error) {
+                console.warn("預設學員／導師名單更新未完成，保留原有資料：", error);
+            }
+        })();
 
         function getStoredSituations() {
             try {
@@ -542,7 +569,11 @@
             const sitSelect = document.getElementById("clinical-situation-select");
             const activeSituations = getStoredSituations().filter(s => s.status === "active");
             sitSelect.innerHTML = '<option value="">-- 請選擇臨床情境（選填） --</option>' + 
-                activeSituations.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+                activeSituations.map(s => {
+                    // 「其他」使用固定識別值，才能正確觸發下方自訂情境必填欄位。
+                    const optionValue = String(s.name || "").trim() === "其他" ? "other" : s.id;
+                    return `<option value="${optionValue}">${s.name}</option>`;
+                }).join('');
 
             // 日期預設今天
             const now = new Date();
@@ -551,7 +582,8 @@
             const day = String(now.getDate()).padStart(2, '0');
             document.getElementById("feedback-date").value = `${year}-${month}-${day}`;
 
-            setActiveFeedbackTypeBtn("做得好");
+            // 初始顯示四大面向，等待教師逐項選擇狀態。
+            renderStep9Checkboxes();
         }
 
         function setupEventListeners() {
@@ -605,14 +637,6 @@
                 });
             });
 
-            document.querySelectorAll(".feedback-type-btn").forEach(btn => {
-                btn.addEventListener("click", (e) => {
-                    const type = e.target.getAttribute("data-type");
-                    setActiveFeedbackTypeBtn(type);
-                    renderStep9Checkboxes();
-                });
-            });
-
             const textarea = document.getElementById("feedback-text");
             textarea.addEventListener("input", () => {
                 if (textarea.value !== lastGeneratedFeedbackText) {
@@ -632,19 +656,6 @@
 
             const filterPgy = document.getElementById("filter-pgy");
             filterPgy.innerHTML = '<option value="">全部 PGY</option>' + getStoredPgyStudents().map(p => `<option value="${p.employee_id}">${p.employee_id} ${p.name}</option>`).join('');
-        }
-
-        function setActiveFeedbackTypeBtn(type) {
-            document.getElementById("selected-feedback-type").value = type;
-            document.querySelectorAll(".feedback-type-btn").forEach(b => {
-                if (b.getAttribute("data-type") === type) {
-                    b.classList.add("bg-blue-600", "text-white", "border-blue-600");
-                    b.classList.remove("bg-white", "text-slate-700");
-                } else {
-                    b.classList.remove("bg-blue-600", "text-white", "border-blue-600");
-                    b.classList.add("bg-white", "text-slate-700");
-                }
-            });
         }
 
         // --- Assessment Score UI 渲染 ---
@@ -745,38 +756,80 @@
                 }
             }
 
-            setActiveFeedbackTypeBtn(targetFeedbackTypes[0]);
+            // 評分結果不再自動替四大面向選擇狀態；由教師依實際觀察逐項判斷。
+            // 保留原有 Assessment 評分與推薦計算，不改變評分結果。
+            renderStep9Checkboxes();
+        }
+
+        function setDomainFeedbackStatus(domain, status) {
+            // 再點一次相同狀態可取消；切換狀態時清除該面向先前勾選的罐頭。
+            if (domainFeedbackStatus[domain] === status) {
+                delete domainFeedbackStatus[domain];
+            } else {
+                domainFeedbackStatus[domain] = status;
+            }
+
+            feedbackTemplates
+                .filter(t => t.domain === domain)
+                .forEach(t => selectedFeedbackModuleIds.delete(t.id));
+
+            generateTextFromCheckedModules();
             renderStep9Checkboxes();
         }
 
         function renderStep9Checkboxes() {
             const container = document.getElementById("modular-checkboxes-container");
-            const currentFeedbackType = document.getElementById("selected-feedback-type").value;
 
-            const filteredTemplates = feedbackTemplates.filter(t => t.active && t.direction.includes(currentFeedbackType));
-            const domains = ["臨床評估與判斷", "臨床操作與病人照護", "溝通與團隊合作", "學習態度與專業成長"];
-            
-            container.innerHTML = domains.map(domain => {
-                const domainTemplates = filteredTemplates.filter(t => t.domain === domain).sort((a, b) => a.id.localeCompare(b.id));
-                if (domainTemplates.length === 0) return '';
+            container.innerHTML = feedbackDomains.map((domain, index) => {
+                const status = domainFeedbackStatus[domain] || "";
+                // 舊版「下一步」罐頭歸入「待加強」區供教師選用，保留既有模板而不遺失內容。
+                const domainTemplates = status ? feedbackTemplates
+                    .filter(t => t.active && t.domain === domain && (
+                        t.direction.includes(status) || (status === "待加強" && t.direction.includes("下一步"))
+                    ))
+                    .sort((a, b) => a.id.localeCompare(b.id)) : [];
+
+                const goodClass = status === "做得好"
+                    ? "bg-emerald-600 text-white border-emerald-600"
+                    : "bg-white text-emerald-700 border-emerald-300 hover:bg-emerald-50";
+                const improveClass = status === "待加強"
+                    ? "bg-amber-500 text-white border-amber-500"
+                    : "bg-white text-amber-700 border-amber-300 hover:bg-amber-50";
 
                 return `
-                    <div class="space-y-1 bg-white p-2.5 rounded-lg border border-slate-200">
-                        <div class="text-xs font-bold text-blue-800 border-b border-slate-100 pb-1 mb-1">${domain}</div>
-                        <div class="space-y-1.5">
-                            ${domainTemplates.map(t => {
-                                const isChecked = selectedFeedbackModuleIds.has(t.id);
-                                return `
-                                    <label class="flex items-start space-x-2 text-xs cursor-pointer hover:bg-slate-50 p-1 rounded">
-                                        <input type="checkbox" value="${t.id}" ${isChecked ? "checked" : ""} onchange="handleModuleCheckboxChange(this)" class="mt-0.5 text-blue-600 rounded focus:ring-blue-500">
-                                        <span class="text-slate-700 leading-snug"><strong class="font-mono text-blue-600">[${t.id}]</strong>${t.text}</span>
-                                    </label>
-                                `;
-                            }).join('')}
+                    <section class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm space-y-2">
+                        <div class="text-sm font-bold text-slate-800">${index + 1}. ${domain}</div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" onclick="setDomainFeedbackStatus('${domain}', '做得好')"
+                                aria-pressed="${status === "做得好"}"
+                                class="min-h-[44px] py-2.5 px-2 text-sm font-semibold rounded-lg border-2 transition-colors ${goodClass}">
+                                ✓ 做得好
+                            </button>
+                            <button type="button" onclick="setDomainFeedbackStatus('${domain}', '待加強')"
+                                aria-pressed="${status === "待加強"}"
+                                class="min-h-[44px] py-2.5 px-2 text-sm font-semibold rounded-lg border-2 transition-colors ${improveClass}">
+                                △ 待加強
+                            </button>
                         </div>
-                    </div>
+                        ${status ? `
+                            <div class="pt-1 space-y-1.5">
+                                <p class="text-xs font-semibold ${status === "做得好" ? "text-emerald-700" : "text-amber-700"}">${status}｜可複選回饋內容</p>
+                                ${domainTemplates.length ? domainTemplates.map(t => {
+                                    const isChecked = selectedFeedbackModuleIds.has(t.id);
+                                    return `
+                                        <label class="flex items-start gap-2 text-sm cursor-pointer rounded-lg p-2 hover:bg-slate-50">
+                                            <input type="checkbox" value="${t.id}" ${isChecked ? "checked" : ""}
+                                                onchange="handleModuleCheckboxChange(this)"
+                                                class="mt-1 w-4 h-4 shrink-0 text-blue-600 rounded focus:ring-blue-500">
+                                            <span class="text-slate-700 leading-relaxed"><strong class="font-mono text-blue-600 text-xs">[${t.id}]</strong> ${t.text}</span>
+                                        </label>
+                                    `;
+                                }).join("") : '<p class="text-xs text-slate-500 py-2">此面向目前沒有啟用的對應罐頭，可直接在下方補充文字。</p>'}
+                            </div>
+                        ` : '<p class="text-xs text-slate-400">請選擇此面向的表現狀態</p>'}
+                    </section>
                 `;
-            }).join('');
+            }).join("");
         }
 
         function handleModuleCheckboxChange(checkbox) {
@@ -880,7 +933,10 @@
             const mentorName = mentorObj ? mentorObj.mentor_name : mentorCode;
 
             const date = document.getElementById("feedback-date").value;
-            const feedbackType = document.getElementById("selected-feedback-type").value;
+            const feedbackDomainStatus = { ...domainFeedbackStatus };
+            const feedbackType = Object.entries(feedbackDomainStatus)
+                .map(([domain, status]) => `${domain}：${status}`)
+                .join("；") || "未選擇面向";
             const feedbackText = document.getElementById("feedback-text").value.trim();
 
             if (!feedbackText) {
@@ -950,7 +1006,8 @@
                 assessment_score_label: assessmentScoreLabel,
                 date: date,
                 mentor_uid: currentUser.uid,
-                feedback_type: feedbackType,
+                feedback_type: feedbackType, // 舊欄位相容：保存四大面向狀態摘要
+                domain_feedback_status: feedbackDomainStatus,
                 feedback_text: feedbackText,
                 feedback_module_ids: Array.from(selectedFeedbackModuleIds),
                 ep_portfolio_status: "pending",
@@ -964,6 +1021,7 @@
             alert("回饋儲存成功！");
 
             selectedFeedbackModuleIds.clear();
+            domainFeedbackStatus = {};
             feedbackTextManuallyEdited = false;
             lastGeneratedFeedbackText = "";
             document.getElementById("feedback-text").value = "";
@@ -1190,7 +1248,7 @@
                         <span>導師：<strong>${r.mentor_code ? r.mentor_code + '｜' : ''}${r.mentor_name || r.mentor}</strong></span>
                         <span>情境：<strong>${r.clinical_situation || '未指定'}</strong></span>
                         ${r.assessment_score_label ? `<span>評分：<strong class="text-indigo-600">${r.assessment_score_label}</strong></span>` : ''}
-                        <span>面向：<strong class="text-emerald-600">${r.feedback_type}</strong></span>
+                        <span>面向：<strong class="text-emerald-600">${r.feedback_type || "舊版紀錄"}</strong></span>
                     </div>
                     <div class="bg-white p-2 rounded border border-slate-200 text-slate-700 whitespace-pre-wrap">${r.feedback_text}</div>
                     <div class="flex justify-between items-center pt-1">
@@ -1225,6 +1283,7 @@
 臨床情境：${r.clinical_situation || '無'}
 評核日期：${r.date}
 臨床導師：${r.mentor_code ? r.mentor_code + '｜' : ''}${r.mentor_name || r.mentor}
+四大面向：${r.feedback_type || '舊版紀錄'}
 質性回饋：${r.feedback_text}
                     </div>
                     <div class="flex justify-end">
