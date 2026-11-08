@@ -124,6 +124,7 @@
                             <select id="mentor-select" required class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                                 <option value="">-- 導師 --</option>
                             </select>
+                            <input type="text" id="mentor-other-name" placeholder="請輸入臨床老師姓名" aria-label="其他臨床老師姓名" class="hidden mt-2 w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1">Step 7: 日期</label>
@@ -575,8 +576,9 @@
             // 導師下拉 (只顯示 active，格式 mentor_code｜mentor_name)
             const mentorSelect = document.getElementById("mentor-select");
             const activeMentors = getStoredMentors().filter(m => m.status === "active");
-            mentorSelect.innerHTML = '<option value="">-- 導師 --</option>' + 
-                activeMentors.map(m => `<option value="${m.mentor_code}">${m.mentor_code}｜${m.mentor_name}</option>`).join('');
+            mentorSelect.innerHTML = '<option value="">-- 導師 --</option>' +
+                activeMentors.map(m => `<option value="${m.mentor_code}">${m.mentor_code}｜${m.mentor_name}</option>`).join('') +
+                '<option value="other">其他</option>';
 
             // 臨床情境下拉 (只顯示 active)
             const sitSelect = document.getElementById("clinical-situation-select");
@@ -641,14 +643,33 @@
             document.getElementById("pgy-select").addEventListener("change", updateExistingEventsDropdown);
             document.getElementById("feedback-date").addEventListener("change", updateExistingEventsDropdown);
 
+            document.getElementById("mentor-select").addEventListener("change", (e) => {
+                const otherNameInput = document.getElementById("mentor-other-name");
+                if (e.target.value === "other") {
+                    otherNameInput.classList.remove("hidden");
+                    otherNameInput.required = true;
+                } else {
+                    otherNameInput.classList.add("hidden");
+                    otherNameInput.required = false;
+                    otherNameInput.value = "";
+                }
+            });
+
+            document.getElementById("existing-event-select").addEventListener("change", (e) => {
+                if (e.target.value) applyExistingAssessmentEvent(e.target.value);
+            });
+
             document.querySelectorAll("input[name='event-mode']").forEach(radio => {
                 radio.addEventListener("change", (e) => {
                     const container = document.getElementById("existing-event-container");
                     if (e.target.value === "existing") {
                         container.classList.remove("hidden");
                         updateExistingEventsDropdown();
+                        const selectedId = document.getElementById("existing-event-select").value;
+                        if (selectedId) applyExistingAssessmentEvent(selectedId);
                     } else {
                         container.classList.add("hidden");
+                        clearExistingAssessmentEventLock();
                     }
                 });
             });
@@ -987,34 +1008,84 @@
             const pgyId = document.getElementById("pgy-select").value;
             const type = document.getElementById("assessment-type").value;
             const item = document.getElementById("assessment-item").value;
-            const sitSelectVal = document.getElementById("clinical-situation-select").value;
-            const situations = getStoredSituations();
-            const matchedSit = situations.find(s => s.id === sitSelectVal);
-            const sitName = sitSelectVal === "other" ? document.getElementById("clinical-situation-other").value : (matchedSit ? matchedSit.name : "");
-            const date = document.getElementById("feedback-date").value;
+            const previousValue = select.value;
 
             select.innerHTML = '<option value="">-- 請選擇符合條件的既有評核事件 --</option>';
-
-            if (!pgyId || !type || !item || !date) return;
+            if (!pgyId || !type || !item) return;
 
             const events = getStoredAssessmentEvents();
             const records = getStoredRecords();
-
-            const matchedEvents = events.filter(ev => 
-                ev.pgy_id === pgyId && 
-                ev.assessment_type === type && 
-                ev.assessment_item === item && 
-                ev.date === date &&
-                (!sitName || ev.clinical_situation === sitName)
+            const matchedEvents = events.filter(ev =>
+                ev.pgy_id === pgyId &&
+                ev.assessment_type === type &&
+                ev.assessment_item === item
             );
 
             matchedEvents.forEach(ev => {
                 const count = records.filter(r => r.assessment_id === ev.assessment_id).length;
                 const opt = document.createElement("option");
                 opt.value = ev.assessment_id;
-                opt.textContent = `${ev.assessment_id} | ${ev.clinical_situation || '未指定情境'} | 已有 ${count} 位導師回饋`;
+                opt.textContent = `${ev.date || "未填日期"} | ${ev.assessment_id} | ${ev.clinical_situation || "未指定情境"} | 已有 ${count} 位導師回饋`;
                 select.appendChild(opt);
             });
+
+            if (previousValue && matchedEvents.some(ev => ev.assessment_id === previousValue)) {
+                select.value = previousValue;
+            }
+        }
+
+        function applyExistingAssessmentEvent(assessmentId) {
+            const dateInput = document.getElementById("feedback-date");
+            const sitSelect = document.getElementById("clinical-situation-select");
+            const otherInput = document.getElementById("clinical-situation-other");
+            const event = getStoredAssessmentEvents().find(ev => ev.assessment_id === assessmentId);
+
+            if (!event) return;
+
+            // 日期必須沿用原事件日期，並鎖定避免被修改。
+            dateInput.value = event.date || "";
+            dateInput.disabled = true;
+
+            // 臨床情境必須沿用原事件內容；若原情境為自訂文字，使用「其他」欄位呈現。
+            const situationId = event.clinical_situation_id || "";
+            const situationName = event.clinical_situation || "";
+            const optionExists = situationId && Array.from(sitSelect.options).some(opt => opt.value === situationId);
+
+            if (situationId === "other" || (!optionExists && situationName)) {
+                sitSelect.value = "other";
+                otherInput.value = situationName;
+                otherInput.classList.remove("hidden");
+                otherInput.required = true;
+                otherInput.readOnly = true;
+            } else if (optionExists) {
+                sitSelect.value = situationId;
+                otherInput.value = "";
+                otherInput.classList.add("hidden");
+                otherInput.required = false;
+                otherInput.readOnly = false;
+            } else {
+                sitSelect.value = "";
+                otherInput.value = "";
+                otherInput.classList.add("hidden");
+                otherInput.required = false;
+                otherInput.readOnly = false;
+            }
+
+            sitSelect.disabled = true;
+            otherInput.readOnly = true;
+        }
+
+        function clearExistingAssessmentEventLock() {
+            document.getElementById("feedback-date").disabled = false;
+            const sitSelect = document.getElementById("clinical-situation-select");
+            const otherInput = document.getElementById("clinical-situation-other");
+            sitSelect.disabled = false;
+            otherInput.readOnly = false;
+            if (sitSelect.value !== "other") {
+                otherInput.classList.add("hidden");
+                otherInput.required = false;
+                otherInput.value = "";
+            }
         }
 
         // --- 表單提交儲存 (完整欄位結構) ---
@@ -1046,11 +1117,19 @@
                 clinicalSituationName = "";
             }
 
-            const mentorCode = document.getElementById("mentor-select").value;
+            let mentorCode = document.getElementById("mentor-select").value;
             const mentorObj = getStoredMentors().find(m => m.mentor_code === mentorCode);
-            const mentorName = mentorObj ? mentorObj.mentor_name : mentorCode;
+            let mentorName = mentorObj ? mentorObj.mentor_name : mentorCode;
+            if (mentorCode === "other") {
+                mentorName = document.getElementById("mentor-other-name").value.trim();
+                if (!mentorName) {
+                    alert("選擇導師「其他」時，請輸入臨床老師姓名！");
+                    document.getElementById("mentor-other-name").focus();
+                    return;
+                }
+            }
 
-            const date = document.getElementById("feedback-date").value;
+            let date = document.getElementById("feedback-date").value;
             const feedbackDomainStatus = { ...domainFeedbackStatus };
             const feedbackType = Object.entries(feedbackDomainStatus)
                 .map(([domain, status]) => `${domain}：${status}`)
@@ -1114,6 +1193,15 @@
                     alert("請選擇要加入的既有評核事件！");
                     return;
                 }
+                const originalEvent = events.find(ev => ev.assessment_id === assessmentId);
+                if (!originalEvent) {
+                    alert("找不到所選既有評核事件，請重新選擇！");
+                    return;
+                }
+                // 最終以原事件資料為準，避免畫面值或使用者操作造成日期／情境不一致。
+                date = originalEvent.date || "";
+                clinicalSituationId = originalEvent.clinical_situation_id || "";
+                clinicalSituationName = originalEvent.clinical_situation || "";
             }
 
             const records = getStoredRecords();
