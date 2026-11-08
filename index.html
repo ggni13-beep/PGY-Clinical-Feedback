@@ -674,29 +674,100 @@
             title.textContent = `Step 3.5: ${type} 評分`;
 
             if (type === "CBD") {
-                const scores = [
-                    { val: 1, label: "1 待加強" },
-                    { val: 2, label: "2 尚可" },
-                    { val: 3, label: "3 普通" },
-                    { val: 4, label: "4 良好" },
-                    { val: 5, label: "5 優秀" }
-                ];
-                container.innerHTML = `<div class="grid grid-cols-5 gap-1 text-xs">` + 
-                    scores.map(s => `
-                        <label class="flex flex-col items-center justify-center p-2 bg-white rounded border border-indigo-200 cursor-pointer hover:bg-indigo-50">
-                            <input type="radio" name="assessment-score" value="${s.val}" data-label="${s.label}" class="text-blue-600 focus:ring-blue-500 mb-1" required>
-                            <span class="font-medium text-slate-700 text-center">${s.label}</span>
-                        </label>
-                    `).join('') + `</div>`;
+                container.innerHTML = `
+                    <div class="space-y-2">
+                        <label for="cbd-score-input" class="block text-xs font-medium text-slate-700">請輸入 CbD 實際評分（0–100 分）</label>
+                        <div class="flex items-center gap-2">
+                            <input
+                                type="number"
+                                id="cbd-score-input"
+                                name="assessment-score"
+                                min="0"
+                                max="100"
+                                step="1"
+                                inputmode="numeric"
+                                required
+                                class="w-full p-3 bg-white border border-indigo-200 rounded-lg text-base font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                placeholder="請輸入 0–100 分"
+                                aria-describedby="cbd-score-hint cbd-score-result">
+                            <span class="text-sm font-semibold text-slate-600 whitespace-nowrap">／100 分</span>
+                        </div>
+                        <p id="cbd-score-hint" class="text-xs text-slate-500">通過標準：80 分（含）以上</p>
+                        <div id="cbd-score-result" class="hidden rounded-lg border p-3 text-sm" aria-live="polite"></div>
+                    </div>`;
+                const cbdInput = document.getElementById("cbd-score-input");
+                cbdInput.addEventListener("input", () => {
+                    const raw = cbdInput.value.trim();
+                    const result = document.getElementById("cbd-score-result");
+                    const value = Number(raw);
+                    if (raw === "" || !Number.isFinite(value) || value < 0 || value > 100) {
+                        result.className = "hidden rounded-lg border p-3 text-sm";
+                        result.textContent = "";
+                        return;
+                    }
+                    result.classList.remove("hidden");
+                    if (value >= 80) {
+                        result.className = "rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800";
+                        result.innerHTML = `<strong>目前分數：${value} 分｜通過</strong><p class="text-xs mt-1">已達通過標準（≥ 80 分）。</p>`;
+                    } else {
+                        result.className = "rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800";
+                        result.innerHTML = `<strong>目前分數：${value} 分｜未通過</strong><p class="text-xs mt-1">尚未達到通過標準（≥ 80 分）。</p>`;
+                    }
+                });
             } else if (type === "Mini-CEX") {
-                const scores = ["N/A", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
-                container.innerHTML = `<div class="grid grid-cols-5 gap-1 text-xs">` + 
-                    scores.map(s => `
-                        <label class="flex flex-col items-center justify-center p-2 bg-white rounded border border-indigo-200 cursor-pointer hover:bg-indigo-50">
-                            <input type="radio" name="assessment-score" value="${s}" data-label="${s}" class="text-blue-600 focus:ring-blue-500 mb-1" required>
-                            <span class="font-medium text-slate-700">${s}</span>
-                        </label>
-                    `).join('') + `</div>`;
+                const scores = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+                container.innerHTML = `
+                    <div class="space-y-3">
+                        <p class="text-xs font-semibold text-slate-700 text-center">請依照下列項目評估學員表現</p>
+                        <div class="border border-slate-300 rounded-lg overflow-hidden bg-white">
+                            <div class="text-xs font-bold text-center py-2 bg-slate-100 border-b border-slate-300">各項考評結果</div>
+                            <div class="grid grid-cols-9 text-center text-xs font-semibold text-slate-600">
+                                <div class="col-span-3 py-1.5 bg-rose-50 border-b border-r border-slate-200">未符合要求</div>
+                                <div class="col-span-3 py-1.5 bg-amber-50 border-b border-r border-slate-200">符合要求</div>
+                                <div class="col-span-3 py-1.5 bg-emerald-50 border-b border-slate-200">表現優異</div>
+                            </div>
+                            <div class="grid grid-cols-9">
+                                ${scores.map(s => {
+                                    const n = Number(s);
+                                    const band = n <= 3 ? "border-rose-200" : n <= 6 ? "border-amber-200" : "border-emerald-200";
+                                    return `
+                                        <label class="flex flex-col items-center justify-center min-h-12 p-1 border-r last:border-r-0 ${band} cursor-pointer hover:bg-blue-50 has-[:checked]:bg-blue-100 has-[:checked]:ring-2 has-[:checked]:ring-inset has-[:checked]:ring-blue-500">
+                                            <input type="radio" name="assessment-score" value="${s}" data-label="${s}" class="text-blue-600 focus:ring-blue-500 mb-1" required>
+                                            <span class="font-bold text-base text-slate-800">${s}</span>
+                                        </label>
+                                    `;
+                                }).join("")}
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                            <div class="rounded-lg border border-rose-200 bg-rose-50 p-2">
+                                <p class="font-bold text-rose-800">1–3 分｜嚴重偏低、不安全</p>
+                                <p class="text-rose-700 mt-1">未符合要求</p>
+                            </div>
+                            <div class="rounded-lg border border-amber-200 bg-amber-50 p-2">
+                                <p class="font-bold text-amber-800">4–5 分｜基本合格但需監督</p>
+                                <p class="text-amber-700 mt-1">符合要求</p>
+                            </div>
+                            <div class="rounded-lg border border-amber-200 bg-amber-50 p-2">
+                                <p class="font-bold text-amber-800">6 分｜可獨立執行部分任務</p>
+                                <p class="text-amber-700 mt-1">符合要求</p>
+                            </div>
+                            <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-2">
+                                <p class="font-bold text-emerald-800">7–9 分｜高度信賴，表現優秀</p>
+                                <p class="text-emerald-700 mt-1">表現優異</p>
+                            </div>
+                        </div>
+                        <div class="rounded-md bg-cyan-50 border border-cyan-200 p-2 text-xs text-cyan-900">
+                            二年期學員及格標準：達到預期標準 5 分以上。
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs cursor-pointer hover:bg-slate-50">
+                                <input type="radio" name="assessment-score" value="N/A" data-label="N/A" class="text-blue-600 focus:ring-blue-500" required>
+                                <span class="font-medium text-slate-700">不適用（N/A）</span>
+                            </label>
+                        </div>
+                        <div id="mini-cex-score-interpretation" class="hidden rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm" aria-live="polite"></div>
+                    </div>`;
             } else if (type === "SIRIPPP") {
                 const scores = [
                     { val: 1, label: "Level 1" },
@@ -713,13 +784,52 @@
                         </label>
                     `).join('') + `</div>`;
             } else if (type === "EPA") {
-                container.innerHTML = `<p class="text-xs text-slate-500 italic p-2 bg-white rounded border border-indigo-100">EPA 不設定虛構評分規則，以質性回饋與導師判斷為主。</p>`;
+                const scores = [
+                    { val: "-1", label: "Level -1 觀察學習階段" },
+                    { val: "2a", label: "Level-2a 共同執行階段" },
+                    { val: "2b", label: "Level-2b 共同執行階段" },
+                    { val: "3a", label: "Level-3a 漸進獨立階段" },
+                    { val: "3b", label: "Level-3b 漸進獨立階段" },
+                    { val: "3c", label: "Level-3c 漸進獨立階段" },
+                    { val: "4", label: "Level-4 可獨立執行" }
+                ];
+                container.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">` +
+                    scores.map(s => `
+                        <label class="flex items-center gap-2 p-3 bg-white rounded border border-indigo-200 cursor-pointer hover:bg-indigo-50">
+                            <input type="radio" name="assessment-score" value="${s.val}" data-label="${s.label}" class="text-blue-600 focus:ring-blue-500 shrink-0" required>
+                            <span class="font-medium text-slate-700 leading-snug">${s.label}</span>
+                        </label>
+                    `).join('') + `</div>`;
             }
 
             document.querySelectorAll("input[name='assessment-score']").forEach(input => {
                 input.addEventListener("change", (e) => {
                     const scoreVal = e.target.value;
                     const assessmentType = document.getElementById("assessment-type").value;
+                    if (assessmentType === "Mini-CEX") {
+                        const interpretation = document.getElementById("mini-cex-score-interpretation");
+                        if (interpretation) {
+                            const descriptions = {
+                                "1": ["1–3 分｜嚴重偏低、不安全", "未符合要求", "text-rose-800"],
+                                "2": ["1–3 分｜嚴重偏低、不安全", "未符合要求", "text-rose-800"],
+                                "3": ["1–3 分｜嚴重偏低、不安全", "未符合要求", "text-rose-800"],
+                                "4": ["4–5 分｜基本合格但需監督", "符合要求", "text-amber-800"],
+                                "5": ["4–5 分｜基本合格但需監督", "符合要求；二年期學員達到及格標準", "text-amber-800"],
+                                "6": ["6 分｜可獨立執行部分任務", "符合要求", "text-amber-800"],
+                                "7": ["7–9 分｜高度信賴，表現優秀", "表現優異", "text-emerald-800"],
+                                "8": ["7–9 分｜高度信賴，表現優秀", "表現優異", "text-emerald-800"],
+                                "9": ["7–9 分｜高度信賴，表現優秀", "表現優異", "text-emerald-800"]
+                            };
+                            if (scoreVal === "N/A") {
+                                interpretation.classList.remove("hidden");
+                                interpretation.innerHTML = '<strong class="text-slate-800">不適用（N/A）</strong><p class="text-slate-600 text-xs mt-1">此項目不納入 1–9 分表現解讀。</p>';
+                            } else {
+                                const detail = descriptions[scoreVal];
+                                interpretation.classList.remove("hidden");
+                                interpretation.innerHTML = `<strong class="${detail[2]}">目前選擇：${scoreVal} 分｜${detail[0]}</strong><p class="text-slate-700 text-xs mt-1">${detail[1]}</p>`;
+                            }
+                        }
+                    }
                     applyTriggerByScore(assessmentType, scoreVal);
                 });
             });
@@ -730,16 +840,8 @@
             let targetFeedbackTypes = ["做得好"];
 
             if (type === "CBD") {
-                const s = parseInt(scoreVal);
-                if (s === 1 || s === 2) {
-                    targetFeedbackTypes = ["待加強"];
-                } else if (s === 3) {
-                    targetFeedbackTypes = ["下一步"];
-                } else if (s === 4) {
-                    targetFeedbackTypes = ["做得好", "下一步"];
-                } else if (s === 5) {
-                    targetFeedbackTypes = ["做得好"];
-                }
+                const s = Number(scoreVal);
+                targetFeedbackTypes = s >= 80 ? ["做得好"] : ["待加強"];
             } else if (type === "Mini-CEX") {
                 if (scoreVal === "N/A") return;
                 const s = parseInt(scoreVal);
@@ -946,7 +1048,18 @@
 
             let assessmentScore = null;
             let assessmentScoreLabel = null;
-            if (assessmentType !== "EPA") {
+            if (assessmentType === "CBD") {
+                const cbdInput = document.getElementById("cbd-score-input");
+                const rawScore = cbdInput ? cbdInput.value.trim() : "";
+                const numericScore = Number(rawScore);
+                if (rawScore === "" || !Number.isFinite(numericScore) || numericScore < 0 || numericScore > 100) {
+                    alert("請輸入 0–100 分的 CbD 實際分數！");
+                    if (cbdInput) cbdInput.focus();
+                    return;
+                }
+                assessmentScore = numericScore;
+                assessmentScoreLabel = `${numericScore} 分（${numericScore >= 80 ? "通過" : "未通過"}；標準 ≥80 分）`;
+            } else if (assessmentType !== "EPA") {
                 const scoreRadio = document.querySelector("input[name='assessment-score']:checked");
                 if (!scoreRadio) {
                     alert(`請完成 ${assessmentType} 評分！`);
