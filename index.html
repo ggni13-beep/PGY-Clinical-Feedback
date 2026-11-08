@@ -291,6 +291,19 @@
             "SIRIPPP": ["SIRIPPP 1", "SIRIPPP 2", "SIRIPPP 3", "SIRIPPP 4", "SIRIPPP 5", "SIRIPPP 6", "SIRIPPP 7"]
         };
 
+        // EPA 顯示名稱：保留原始 EPA ID 作為 option.value，確保既有評核紀錄相容。
+        const epaItemDescriptions = {
+            "EPA 1": "提供病人藥物吸入治療照護",
+            "EPA 3": "提供胸腔手術病人肺擴張治療照護",
+            "EPA 5": "提供病人氧氣治療照護",
+            "EPA 6": "使用侵襲性呼吸器病人之初始設定及照護",
+            "EPA 7": "呼吸窘迫病人之處置",
+            "EPA 8": "使用呼吸器病人之緊急處置",
+            "EPA 9": "使用呼吸器病人之轉送照護",
+            "EPA 10": "使用侵襲性呼吸器病人之脫離照護",
+            "EPA 11": "移除病人氣管內管之照護"
+        };
+
         const defaultPgyStudents = [
             { employee_id: "130020", name: "陳O怡", status: "active", created_at: new Date().toISOString() },
             { employee_id: "130088", name: "謝O元", status: "active", created_at: new Date().toISOString() },
@@ -594,8 +607,11 @@
                 if (type && assessmentMaster[type]) {
                     assessmentMaster[type].forEach(item => {
                         const opt = document.createElement("option");
+                        // value 保留 EPA ID，顯示文字增加對應工作內容。
                         opt.value = item;
-                        opt.textContent = item;
+                        opt.textContent = type === "EPA" && epaItemDescriptions[item]
+                            ? `${item}｜${epaItemDescriptions[item]}`
+                            : item;
                         itemSelect.appendChild(opt);
                     });
                 }
